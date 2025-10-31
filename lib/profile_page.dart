@@ -7,7 +7,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Center(
       child: Text(
-        'Mi perfil canche', 
+        'aqui midifique yo erubiel te ama', 
         style: TextStyle(fontSize: 45, color: Colors.purple)
       )
     );
