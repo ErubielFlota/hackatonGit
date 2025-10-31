@@ -14,7 +14,7 @@ class PrincipalPage extends StatelessWidget {
 
   // Lista de datos de ejemplo para simular los elementos de la lista
   final List<Programas> programastList = const [
-    Programas(nombre: 'abortos erubiel', desc: 'Click para más detalles.'),
+    Programas(nombre: 'Beca Jovenes Construyendo el futuro', desc: 'Click para más detalles.'),
     Programas(nombre: 'Beca Universal de Educación Básica Rita Cetina', desc: 'Click para más detalles.'),
     Programas(nombre: 'Salud Casa por Casa', desc: 'Click para más detalles.'),
     Programas(nombre: 'Pensión Para el Bienestar de las Perosnas Mayores', desc: 'Click para más detalles.'),
@@ -36,7 +36,7 @@ class PrincipalPage extends StatelessWidget {
     
       appBar: AppBar(
         title: const Text('Programas Disponibles'),
-        backgroundColor: Colors.blueAccent, // Color fondo 
+        backgroundColor: Colors.lightBlueAccent, // Color fondo 
         foregroundColor: Colors.white, // Color texto 
         elevation: 1,
       ),

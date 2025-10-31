@@ -7,7 +7,7 @@ class BienvenidaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -20,7 +20,7 @@ class BienvenidaScreen extends StatelessWidget {
                   children: [
                     // Logo
                     Image.asset(
-                      'assets/logo_bienestar.png',
+                      'assets/imagenes/image.png',
                       width: 450,
                       fit: BoxFit.contain,
                     ),
@@ -30,7 +30,7 @@ class BienvenidaScreen extends StatelessWidget {
                     const Text(
                       "Bienvenido",
                       style: TextStyle(
-                        color: Color(0xFF6D1D1D),
+                        color: Colors.black,
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
@@ -57,7 +57,7 @@ class BienvenidaScreen extends StatelessWidget {
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF6D1D1D),
+                          backgroundColor: Colors.lightBlueAccent,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),

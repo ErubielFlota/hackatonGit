@@ -6,9 +6,9 @@ class MujeresPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF1F9),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
-        backgroundColor: Colors.pinkAccent,
+        backgroundColor: Colors.lightBlueAccent,
         title: const Text(
           'Programas para Mujeres',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),

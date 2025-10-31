@@ -44,7 +44,7 @@ class CategoriesPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF1F9),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
         backgroundColor: Colors.lightBlueAccent,
         title: const Text(
@@ -76,8 +76,8 @@ class CategoriesPage extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                elevation: 6,
-                color: category['color'].withOpacity(0.15),
+                elevation: 1,
+                color: category['color'].withOpacity(0.2),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
