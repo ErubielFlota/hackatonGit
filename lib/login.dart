@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '/home_page.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -155,7 +156,7 @@ class LoginPage extends StatelessWidget {
               OutlinedButton(
                 onPressed: () {
                   // Aquí podrías navegar al Home
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF6B1D35)),

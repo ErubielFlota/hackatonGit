@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prueba2app/bienvenida.dart';
 
 import 'package:prueba2app/welcome_screen.dart';
 
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
       title: 'Material App',
       theme: ThemeData( useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home:WelcomeScreen()
+      home:BienvenidaScreen()
     );
   }
 }
