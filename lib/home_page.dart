@@ -110,7 +110,7 @@ class _HomePageState extends State<HomePage> {
               ),
               GButton(
                 icon: Icons.comment,
-                text: ' Quejas y sugerencias',
+                text: ' Quejas',
                 iconActiveColor: Colors.white,
                 textColor: Colors.white,
               ),

@@ -36,6 +36,7 @@ class PrincipalPage extends StatelessWidget {
     
       appBar: AppBar(
         title: const Text('Programas Disponibles'),
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.lightBlueAccent, // Color fondo 
         foregroundColor: Colors.white, // Color texto 
         elevation: 1,

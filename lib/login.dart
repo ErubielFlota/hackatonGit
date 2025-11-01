@@ -97,6 +97,7 @@ class LoginPage extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.lightBlueAccent,
+        automaticallyImplyLeading: false,
         title: const Text(
           'Mi Perfil',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
