@@ -47,6 +47,7 @@ class CategoriesPage extends StatelessWidget {
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
         backgroundColor: Colors.lightBlueAccent,
+        automaticallyImplyLeading: false,
         title: const Text(
           'Categorías de Programas',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),

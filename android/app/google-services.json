@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1076375118385",
+    "project_id": "pruebahackaton-bfb64",
+    "storage_bucket": "pruebahackaton-bfb64.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1076375118385:android:57fb4b8a958cc1a2212b10",
+        "android_client_info": {
+          "package_name": "com.example.prueba2app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgQURFFMjz7oP7axbgf_EuO9PYAIQHw4U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

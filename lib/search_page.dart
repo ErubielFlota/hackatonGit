@@ -8,6 +8,7 @@ class SearchPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.lightBlueAccent,
+        automaticallyImplyLeading: false,
         title: const Text(
           'Quejas y sugerencias',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
