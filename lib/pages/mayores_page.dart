@@ -6,9 +6,9 @@ class MayoresPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0E9FF),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
-        backgroundColor: Colors.purpleAccent,
+        backgroundColor: Colors.lightBlueAccent,
         title: const Text(
           'Programas para Mayores de Edad',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),

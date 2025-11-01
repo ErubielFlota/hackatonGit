@@ -4,24 +4,113 @@ import '/home_page.dart';
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
+  void _mostrarVentanaInvitado(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // No se cierra tocando fuera del cuadro
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Al no registrarse no podrá tener los siguientes beneficios de la aplicación:",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 15),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("* Notificaciones en su correo de programas disponibles."),
+                    Text("* Acceder al apartado de quejas y sugerencias."),
+                    Text("* Interactuar con el asistente Chatbot."),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 25),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Botón Cancelar
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Cierra el cuadro
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      minimumSize: const Size(100, 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      "Cancelar",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+
+                  // Botón Continuar
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Cierra el cuadro
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HomePage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      minimumSize: const Size(100, 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      "Continuar",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.lightBlueAccent,
+        title: const Text(
+          'Mi Perfil',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo
-              Image.asset(
-                'assets/logo_bienestar.png',
-                height: 100,
-              ),
+              Image.asset('assets/logo_bienestar.png', height: 100),
               const SizedBox(height: 20),
-
-              // Título principal
               const Text(
                 "Inicia sesión",
                 style: TextStyle(
@@ -31,8 +120,6 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-
-              // Campo de usuario
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -52,8 +139,6 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Campo de contraseña
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -74,8 +159,6 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 15),
-
-              // Olvidó contraseña
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton(
@@ -87,8 +170,6 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 5),
-
-              // Botón de inicio
               ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
@@ -108,18 +189,11 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // O continuar con
               const Text("O continua con", style: TextStyle(color: Colors.grey)),
               const SizedBox(height: 10),
-
-              // Botón Google
               ElevatedButton.icon(
                 onPressed: () {},
-                icon: Image.asset(
-                  'assets/google_logo.png',
-                  height: 20,
-                ),
+                icon: Image.asset('assets/google_logo.png', height: 20),
                 label: const Text("Continuar con Google"),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
@@ -131,8 +205,6 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 25),
-
-              // Crear cuenta
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -152,11 +224,10 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
-              // Omitir por ahora
+              // 🔹 Botón "Omitir por ahora" que muestra el diálogo
               OutlinedButton(
                 onPressed: () {
-                  // Aquí podrías navegar al Home
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+                  _mostrarVentanaInvitado(context);
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF6B1D35)),

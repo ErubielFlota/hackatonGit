@@ -6,9 +6,9 @@ class AgriculturaPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEAFBEA),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.lightBlueAccent,
         title: const Text(
           'Programas de Agricultura',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -16,6 +16,7 @@ class AgriculturaPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: const Center(
+        
         child: Text(
           'Aquí se mostrarán los programas agrícolas',
           style: TextStyle(fontSize: 20, color: Colors.green),

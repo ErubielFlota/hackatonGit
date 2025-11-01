@@ -5,11 +5,16 @@ class SearchPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Partos canche flota skividi toilet', 
-        style: TextStyle(fontSize: 45, color: Colors.orange)
-      )
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.lightBlueAccent,
+        title: const Text(
+          'Quejas y sugerencias',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
+      ),
+       
     );
   }
 }

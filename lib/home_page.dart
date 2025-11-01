@@ -4,7 +4,7 @@ import 'package:prueba2app/login.dart';
 import '/home_page_content.dart'; 
 import '/categories_page.dart';
 import '/search_page.dart';
-import 'login_screen.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -109,8 +109,8 @@ class _HomePageState extends State<HomePage> {
                 textColor: Colors.white,
               ),
               GButton(
-                icon: Icons.search,
-                text: 'Buscar Femboys',
+                icon: Icons.comment,
+                text: ' Quejas y sugerencias',
                 iconActiveColor: Colors.white,
                 textColor: Colors.white,
               ),
