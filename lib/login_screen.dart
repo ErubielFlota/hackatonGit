@@ -1,8 +1,79 @@
 import 'package:flutter/material.dart';
-import 'package:prueba2app/login.dart';
+import 'register.dart';
+import 'home_page.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
+
+  // 🔹 Función para mostrar ventana de invitado
+  void _mostrarVentanaInvitado(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Al no registrarse no podrá tener los siguientes beneficios de la aplicación:",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 15),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("* Notificaciones en su correo de programas disponibles."),
+                    Text("* Acceder al apartado de quejas y sugerencias."),
+                    Text("* Interactuar con el asistente Chatbot."),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 25),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      minimumSize: const Size(100, 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text("Cancelar", style: TextStyle(color: Colors.white)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HomePage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      minimumSize: const Size(100, 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text("Continuar", style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +93,9 @@ class LoginScreen extends StatelessWidget {
                 child: Text(
                   'Inicia sesión',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[900],
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[900],
+                      ),
                 ),
               ),
               const SizedBox(height: 40),
@@ -79,11 +150,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () {},
-                    icon: const Icon(
-                      Icons.facebook,
-                      size: 32,
-                      color: Colors.blue,
-                    ),
+                    icon: const Icon(Icons.facebook, size: 32, color: Colors.blue),
                   ),
                 ],
               ),
@@ -96,21 +163,16 @@ class LoginScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
-                        ),
+                        MaterialPageRoute(builder: (context) => const RegisterPage()),
                       );
                     },
                     child: const Text('Crea una.'),
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
               OutlinedButton(
-                onPressed: () {
-                  Navigator.pop(context); // Regresa a la bienvenida
-                },
+                onPressed: () => _mostrarVentanaInvitado(context),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
