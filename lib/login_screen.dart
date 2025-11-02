@@ -1,147 +1,186 @@
 import 'package:flutter/material.dart';
+import 'register.dart';
+import 'home_page.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
+  // 🔹 Función para mostrar ventana de invitado
+  void _mostrarVentanaInvitado(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Al no registrarse no podrá tener los siguientes beneficios de la aplicación:",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 15),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("* Notificaciones en su correo de programas disponibles."),
+                    Text("* Acceder al apartado de quejas y sugerencias."),
+                    Text("* Interactuar con el asistente Chatbot."),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 25),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      minimumSize: const Size(100, 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text("Cancelar", style: TextStyle(color: Colors.white)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HomePage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      minimumSize: const Size(100, 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text("Continuar", style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Usamos SingleChildScrollView para evitar desbordamiento cuando el teclado aparece
-    return const Scaffold(
-      body: Center(
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(32.0),
+          padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // Título principal
-              Text(
-                'Inicia sesión',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A8A), 
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 40),
+              Center(
+                child: Text(
+                  'Inicia sesión',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[900],
+                      ),
                 ),
               ),
-
-              SizedBox(height: 40),
-
-              //Campo de Usuario (Correo Electrónico)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Usuario', style: TextStyle(fontSize: 16)),
-              ),
-              SizedBox(height: 8),
+              const SizedBox(height: 40),
               TextField(
-                decoration: InputDecoration(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Usuario',
                   hintText: 'Ingrese su correo electrónico',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0),
+                  prefixIcon: Icon(Icons.email_outlined),
+                  border: OutlineInputBorder(),
                 ),
-                keyboardType: TextInputType.emailAddress,
               ),
-
-              SizedBox(height: 20),
-
-              // Campo de contraseña
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Contraseña', style: TextStyle(fontSize: 16)),
-              ),
-              SizedBox(height: 8),
+              const SizedBox(height: 20),
               TextField(
-                decoration: InputDecoration(
-                  hintText: 'Ingresa tu contraseña',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0),
-                ),
+                controller: passwordController,
                 obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Contraseña',
+                  hintText: 'Ingresa tu contraseña',
+                  prefixIcon: Icon(Icons.lock_outline),
+                  border: OutlineInputBorder(),
+                ),
               ),
-
-              SizedBox(height: 10),
-
-              // Olvidaste tu contraseña?
+              const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
-                child: Text(
-                  '¿Has olvidado tu contraseña?',
-                  style: TextStyle(
-                    color: Color(0xFF1E3A8A), 
-                    fontWeight: FontWeight.w500,
-                  ),
+                child: TextButton(
+                  onPressed: () {},
+                  child: const Text('¿Has olvidado tu contraseña?'),
                 ),
               ),
-
-              SizedBox(height: 25),
-
-              // Botón de Inicio de Sesión
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: null, // Aquí iría la lógica de inicio de sesión
-                  
-                  child: Text(
-                    'Inicio',
-                    style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: () {},
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+                child: const Text('Inicio', style: TextStyle(fontSize: 16)),
               ),
-
-              SizedBox(height: 20),
-
-              //Separador "O continua con" 
-              Text('O continua con', style: TextStyle(color: Colors.grey)),
-
-              SizedBox(height: 15),
-
-              //Botones de Redes Sociales
+              const SizedBox(height: 20),
+              const Center(child: Text('O continúa con')),
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  // Botón de Google (Simulado)
-                  
-                  SizedBox(width: 20),
-                  
-                ],
-              ),
-
-              SizedBox(height: 40),
-
-              // --- ¿No tienes una cuenta? Crea una. ---
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text('¿No tienes una cuenta? ', style: TextStyle(fontSize: 16)),
-                  Text(
-                    'Crea una.',
-                    style: TextStyle(
-                      color: Color(0xFF1E3A8A), // Enlace para crear cuenta
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                children: [
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.g_mobiledata, size: 36),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.facebook, size: 32, color: Colors.blue),
                   ),
                 ],
               ),
-
-              SizedBox(height: 30),
-
-              // --- Botón "Omitir por ahora" ---
-              //SizedBox(
-               // width: 200,
-                //height: 48,
-                //child: ElevatedButton(
-                 // onPressed: null, // Aquí iría la lógica para omitir la sesión y continuar
-                 // 
-                 // child: Text(
-                  //  'Omitir por ahora',
-                   // style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.normal),
-                // ),
-               // ),
-              //),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('¿No tienes una cuenta?'),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RegisterPage()),
+                      );
+                    },
+                    child: const Text('Crea una.'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () => _mostrarVentanaInvitado(context),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Omitir por ahora'),
+              ),
             ],
           ),
         ),

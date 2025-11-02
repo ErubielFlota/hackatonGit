@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login.dart';
+import 'login_screen.dart';
 
 class BienvenidaScreen extends StatelessWidget {
   const BienvenidaScreen({super.key});
@@ -7,96 +7,81 @@ class BienvenidaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const SizedBox(height: 30),
-                Column(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SizedBox(height: 30),
+              Expanded(
+                child: Column(
                   children: [
-                    // Logo
+                    // Imagen de bienvenida (asegúrate de tenerla en assets)
                     Image.asset(
-                      'assets/imagenes/image.png',
-                      width: 450,
-                      fit: BoxFit.contain,
+                      'assets/family_illustration.png',
+                      height: 220,
                     ),
-                    const SizedBox(height: 40),
-
-                    // Título
-                    const Text(
-                      "Bienvenido",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    const SizedBox(height: 32),
+                    Text(
+                      'Bienvenido',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue[900],
+                          ),
                     ),
                     const SizedBox(height: 16),
-
-                    // Descripción
                     const Text(
-                      "Te presentamos una forma sencilla para conocer acerca de nuestros programas disponibles según tu región de Quintana Roo.",
+                      'Te presentamos una forma sencilla de conocer acerca de los programas y apoyos disponibles según el municipio del estado de Quintana Roo.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 16,
-                        height: 1.4,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.black54),
                     ),
                   ],
                 ),
-
-                // Botón
-                Column(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.lightBlueAccent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              Column(
+                children: [
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
                         ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const LoginPage()),
-                          );
-                        },
-                        child: const Text(
-                          "COMENZAR",
+                      );
+                    },
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('COMENZAR', style: TextStyle(fontSize: 16)),
+                  ),
+                  const SizedBox(height: 12),
+                  Column(
+                    children: const [
+                      SizedBox(height: 8),
+                      Text('© Derechos reservados 2025',
+                          style: TextStyle(color: Colors.grey)),
+                      SizedBox(height: 8),
+                      Text('MiApoyo',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    const Text(
-                      "Derechos reservados 2025",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                ),
-              ],
-            ),
+                              fontWeight: FontWeight.bold, color: Colors.blue)),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
+
+
