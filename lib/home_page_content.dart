@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Asegúrate de tenerlo en pubspec.yaml
 
 // MODELO DE PROGRAMA
 class Programa {

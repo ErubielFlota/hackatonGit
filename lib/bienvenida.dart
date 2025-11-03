@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
+import 'package:prueba2app/autentificacion.dart';
+
 
 class BienvenidaScreen extends StatelessWidget {
   const BienvenidaScreen({super.key});
@@ -18,7 +19,7 @@ class BienvenidaScreen extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    // Imagen de bienvenida (asegúrate de tenerla en assets)
+                    
                     Image.asset(
                       'assets/family_illustration.png',
                       height: 220,
@@ -50,7 +51,7 @@ class BienvenidaScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
+                          builder: (context) => const Autentificacion(),
                         ),
                       );
                     },

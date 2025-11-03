@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:prueba2app/profile_page.dart';
 import '/home_page_content.dart'; 
 import '/categories_page.dart';
 import '/search_page.dart';
-import 'package:prueba2app/login_screen.dart';
+
 
 
 class HomePage extends StatefulWidget {
@@ -23,7 +24,7 @@ class _HomePageState extends State<HomePage> {
     const PrincipalPage(),
     const CategoriesPage(),
     const SearchPage(),
-    const LoginScreen(),
+    const ProfilePage(),
   ];
 
 

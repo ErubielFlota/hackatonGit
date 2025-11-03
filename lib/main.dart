@@ -4,7 +4,14 @@ import 'package:prueba2app/bienvenida.dart';
 import 'package:prueba2app/firebase_options.dart';
 
 
-Future<void> main() async {
+void main () async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
+}
+
+Future<void> main2() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -18,10 +25,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Material App',
+      title: 'MiApoyo',
       theme: ThemeData( useMaterial3: true),
       debugShowCheckedModeBanner: false,
       home:BienvenidaScreen()
     );
   }
 }
+
