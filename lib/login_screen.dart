@@ -1,7 +1,24 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'register.dart';
-import 'home_page.dart';
+import 'home_page.dart';*/
 
+
+
+
+
+
+
+//LO SIENTO SANTI, CREO ESTA PAGINA NO SE VA A USAR DE NUEVO, EN LUGAR DE ESTA PAGINA TUVE QUE HACER OTRA, ES LA QUE SE LLAMA Register
+//ES QUE CON EL QUE HABIAS HECHO NOMAS NO FUNCIONABA AGREGAR USUARIOS:(
+
+
+
+
+
+
+
+
+/*
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -77,8 +94,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
+    
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -100,7 +116,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 40),
               TextField(
-                controller: emailController,
+                
                 decoration: const InputDecoration(
                   labelText: 'Usuario',
                   hintText: 'Ingrese su correo electrónico',
@@ -110,7 +126,7 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: passwordController,
+                
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: 'Contraseña',
@@ -161,6 +177,7 @@ class LoginScreen extends StatelessWidget {
                   const Text('¿No tienes una cuenta?'),
                   TextButton(
                     onPressed: () {
+                      
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const RegisterPage()),
@@ -187,4 +204,4 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-}
+}*/
