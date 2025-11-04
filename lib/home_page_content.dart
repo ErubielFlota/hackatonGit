@@ -1,18 +1,141 @@
 import 'package:flutter/material.dart';
 
-// MODELO DE PROGRAMA
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+
+class ProgramaDetailPage extends StatelessWidget {
+  final Programa programa;
+  const ProgramaDetailPage({super.key, required this.programa});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(programa.nombre),
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                programa.imagenUrl,
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 200,
+                    color: Colors.grey.shade300,
+                    child: const Center(
+                      child: Icon(Icons.error, size: 40, color: Colors.blueGrey),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: (programa.estadoActual() == 'Activo' ? Colors.green : Colors.amber).withOpacity(0.15),
+                  border: Border.all(color: programa.estadoActual() == 'Activo' ? Colors.green : Colors.amber),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: Text(
+                  programa.estadoActual(),
+                  style: TextStyle(
+                    color: programa.estadoActual() == 'Activo' ? Colors.green : Colors.amber,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+
+            Text(
+              programa.nombre,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueGrey[800],
+                  ),
+            ),
+            const Divider(height: 30, thickness: 1),
+
+            
+            const Text(
+              'Detalles del Programa:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              programa.descripcion,
+              style: const TextStyle(fontSize: 16, height: 1.5),
+            ),
+
+            const SizedBox(height: 20),
+
+            
+            Text('Inicia: ${programa.inicio.toString().split(' ')[0]}', style: const TextStyle(color: Colors.grey)),
+            Text('Finaliza: ${programa.fin.toString().split(' ')[0]}', style: const TextStyle(color: Colors.grey)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
 class Programa {
+  final String id; 
   final String nombre;
+  final String imagenUrl; 
+  final String descripcion; 
   final DateTime inicio;
   final DateTime fin;
 
   Programa({
+    required this.id,
     required this.nombre,
+    required this.imagenUrl,
+    required this.descripcion,
     required this.inicio,
     required this.fin,
   });
 
-  // Determinar estado según fechas
+  
+  factory Programa.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>?;
+
+    
+    if (data == null) {
+      throw Exception("Documento de Firestore no contiene datos.");
+    }
+
+    
+    final inicioTimestamp = data['inicio'] as Timestamp?;
+    final finTimestamp = data['fin'] as Timestamp?;
+
+    return Programa(
+      id: doc.id,
+      nombre: data['titulo'] ?? 'Programa sin nombre',
+      descripcion: data['descripcion'] ?? 'Sin descripción.',
+      imagenUrl: data['imagenUrl'] ?? 'https://placehold.co/70x70/223399/FFFFFF?text=P',
+      inicio: inicioTimestamp?.toDate() ?? DateTime.now(),
+      fin: finTimestamp?.toDate() ?? DateTime.now().add(const Duration(days: 365)),
+    );
+  }
+
+  
   String estadoActual() {
     final ahora = DateTime.now();
     if (ahora.isBefore(inicio)) return 'Próximamente';
@@ -21,7 +144,7 @@ class Programa {
   }
 }
 
-// PÁGINA PRINCIPAL
+
 class PrincipalPage extends StatefulWidget {
   const PrincipalPage({super.key});
 
@@ -31,30 +154,11 @@ class PrincipalPage extends StatefulWidget {
 
 class _PrincipalPageState extends State<PrincipalPage> {
   String filtro = '';
-
-  // Lista de programas con fechas simuladas
-  final List<Programa> programas = [
-    Programa(
-      nombre: 'Beca universal de educación MEDIA SUPERIOR',
-      inicio: DateTime(2025, 1, 1),
-      fin: DateTime(2025, 12, 31),
-    ),
-    Programa(
-      nombre: 'Beca educación SUPERIOR: JÓVENES ESCRIBIENDO EL FUTURO',
-      inicio: DateTime(2025, 12, 15),
-      fin: DateTime(2026, 6, 30),
-    ),
-    Programa(
-      nombre: 'Beca universal de educación MEDIA SUPERIOR (anterior)',
-      inicio: DateTime(2023, 1, 1),
-      fin: DateTime(2023, 12, 31),
-    ),
-  ];
-
-  // Filtrado dinámico
-  List<Programa> get programasFiltrados => programas
-      .where((p) => p.nombre.toLowerCase().contains(filtro.toLowerCase()))
-      .toList();
+  
+  
+  
+  final CollectionReference _programasCollection =
+      FirebaseFirestore.instance.collection('programas');
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +170,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🟦 Título principal
+              
               Center(
                 child: Text(
                   'Programas disponibles',
@@ -78,7 +182,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
               ),
               const SizedBox(height: 16),
 
-              // 🔍 Barra de búsqueda moderna
+              
               TextField(
                 decoration: InputDecoration(
                   hintText: 'Busque un programa en específico',
@@ -93,34 +197,77 @@ class _PrincipalPageState extends State<PrincipalPage> {
                   ),
                 ),
                 onChanged: (query) {
+                  // Cuando cambia el texto, actualiza el filtro y reconstruye el widget
                   setState(() => filtro = query);
                 },
               ),
               const SizedBox(height: 16),
 
-              // 🧩 Lista de programas animada
+              
               Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 400),
-                  child: programasFiltrados.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'No se encontraron programas.',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                        )
-                      : ListView.builder(
-                          key: ValueKey(filtro),
-                          itemCount: programasFiltrados.length,
-                          itemBuilder: (context, index) {
-                            final programa = programasFiltrados[index];
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                              child: ProgramaCard(programa: programa),
-                            );
-                          },
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: _programasCollection.snapshots(),
+                  builder: (context, snapshot) {
+                    // Manejo del estado: Cargando
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    // Manejo del estado: Error
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)),
+                      );
+                    }
+
+                    // Mapear los documentos de Firestore a la lista de objetos Programa
+                    final allPrograms = snapshot.data!.docs
+                        .map((doc) => Programa.fromFirestore(doc))
+                        .toList();
+                    
+                    // Filtrar la lista basada en el texto de búsqueda
+                    final programasFiltrados = allPrograms
+                        .where((p) => p.nombre.toLowerCase().contains(filtro.toLowerCase()))
+                        .toList();
+
+                    // Mostrar si no hay resultados después de filtrar
+                    if (programasFiltrados.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No se encontraron programas.',
+                          style: TextStyle(color: Colors.black54),
                         ),
+                      );
+                    }
+
+                    // Mostrar la lista
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      child: ListView.builder(
+                        key: ValueKey(filtro),
+                        itemCount: programasFiltrados.length,
+                        itemBuilder: (context, index) {
+                          final programa = programasFiltrados[index];
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            // Al hacer tap, navegamos a la pantalla de detalle
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProgramaDetailPage(programa: programa),
+                                  ),
+                                );
+                              },
+                              child: ProgramaCard(programa: programa),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -148,7 +295,7 @@ class ProgramaCard extends StatelessWidget {
     final etiqueta = switch (estado) {
       'Activo' => 'Activo',
       'Próximamente' => 'Próximamente',
-      _ => 'No disponible',
+      _ => 'Finalizado',
     };
 
     return Card(
@@ -159,18 +306,30 @@ class ProgramaCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            // 🖼️ Placeholder temporal (sin imagen aún)
-            Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.image_outlined,
-                color: Colors.grey,
-                size: 40,
+            // 🖼️ Imagen cargada desde la URL de Firestore
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                programa.imagenUrl,
+                width: 70,
+                height: 70,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  // Fallback si la imagen no carga
+                  return Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      color: Colors.grey,
+                      size: 40,
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(width: 12),
@@ -211,12 +370,14 @@ class ProgramaCard extends StatelessWidget {
                 ],
               ),
             ),
+             const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.blueGrey),
           ],
         ),
       ),
     );
   }
 }
+
 
 
 

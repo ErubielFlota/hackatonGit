@@ -4,10 +4,15 @@ import 'package:prueba2app/bienvenida.dart';
 import 'package:prueba2app/firebase_options.dart';
 
 
-void main () async {
+void main() async {
+  // 🔹 Asegura que Flutter esté inicializado antes de usar Firebase
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔹 Inicializa Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(const MyApp());
 }
 
