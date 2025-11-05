@@ -15,13 +15,13 @@ class CategoriesPage extends StatelessWidget {
         'title': 'Mujeres',
         'icon': Icons.female,
         'color': Colors.pinkAccent,
-        'page': const MujeresPage(),
+        'page': const ProgramasMujeresPage(),
       },
       {
         'title': 'Educación',
         'icon': Icons.school,
         'color': Colors.blueAccent,
-        'page': const EducacionPage(),
+        'page': const ProgramasEducacionPage(),
       },
       {
         'title': 'Agricultura',
@@ -39,7 +39,7 @@ class CategoriesPage extends StatelessWidget {
         'title': 'Mayores de edad',
         'icon': Icons.elderly,
         'color': Colors.purpleAccent,
-        'page': const MayoresPage(),
+        'page': const AdultosPage(),
       },
     ];
 
