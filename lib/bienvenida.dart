@@ -20,11 +20,16 @@ class BienvenidaScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     
+
                     Image.asset(
-                      'assets/family_illustration.png',
-                      height: 220,
+                      'assets/Imagen_Familia.png',
+                      height: 400,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                     ),
                     const SizedBox(height: 32),
+
+
                     Text(
                       'Bienvenido',
                       style: Theme.of(context)
