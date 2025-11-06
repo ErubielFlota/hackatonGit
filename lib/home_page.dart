@@ -3,7 +3,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:prueba2app/profile_page.dart';
 import '/home_page_content.dart'; 
 import '/categories_page.dart';
-import '/search_page.dart';
+import 'formulario_quejas_sugerencias.dart';
 
 
 
@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> screens = [
     const PrincipalPage(),
     const CategoriesPage(),
-    const SearchPage(),
+    const FormularioQuejasSugerenciasPage(),
     const ProfilePage(),
   ];
 
