@@ -22,10 +22,9 @@ class BienvenidaScreen extends StatelessWidget {
                     
 
                     Image.asset(
-                      'assets/Imagen_Familia.png',
-                      height: 400,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+                      'bienestarbanner.png',
+                      fit: BoxFit.contain
+                      
                     ),
                     const SizedBox(height: 32),
 
