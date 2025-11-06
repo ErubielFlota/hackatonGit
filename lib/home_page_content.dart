@@ -6,7 +6,7 @@ class Programa {
   final String id; 
   final String nombre;
   final String imagenUrl; 
-  final String descripcion; 
+  final String descripcion;
   final DateTime inicio;
   final DateTime fin;
   final String localidad; 
