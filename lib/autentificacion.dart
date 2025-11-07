@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prueba2app/home_page.dart';
+import 'package:prueba2app/theme/colors.dart';
 import 'firebase_auth_dart.dart';
 import 'register.dart'; 
 
@@ -144,12 +145,12 @@ class AuthPageState extends State<Autentificacion> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              const Text(
+              Text(
                 'Inicia sesión',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C3E50),
+                  color: primaryColor.darker,
                 ),
               ),
               const SizedBox(height: 50),
@@ -160,7 +161,7 @@ class AuthPageState extends State<Autentificacion> {
                 decoration: InputDecoration(
                   labelText: 'Usuario',
                   hintText: 'Ingrese su correo electrónico',
-                  prefixIcon: const Icon(Icons.email, color: Colors.deepPurple),
+                  prefixIcon: Icon(Icons.email, color: primaryColor.darker),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(color: Colors.grey),
@@ -179,14 +180,14 @@ class AuthPageState extends State<Autentificacion> {
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: 'Contraseña',
-                  prefixIcon: const Icon(Icons.lock, color: Colors.deepPurple),
+                  prefixIcon:  Icon(Icons.lock, color: primaryColor.darker),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(color: Colors.grey),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
-                    borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
+                    borderSide: BorderSide(color: primaryColor, width: 2),
                   ),
                 ),
                 obscureText: true,
@@ -202,9 +203,9 @@ class AuthPageState extends State<Autentificacion> {
                       const SnackBar(content: Text('Funcionalidad de recuperar contraseña pendiente')),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     '¿Has olvidado tu contraseña?',
-                    style: TextStyle(color: Colors.deepPurple),
+                    style: TextStyle(color: primaryColor.darker),
                   ),
                 ),
               ),
@@ -215,7 +216,7 @@ class AuthPageState extends State<Autentificacion> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple, 
+                    backgroundColor: Theme.of(context).colorScheme.primary, 
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
@@ -278,11 +279,11 @@ class AuthPageState extends State<Autentificacion> {
                         MaterialPageRoute(builder: (context) => const RegisterPage()),
                       );
                     },
-                    child: const Text(
+                    child: Text(
                       'Crea una.',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.deepPurple,
+                        color: primaryColor.darker,
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.underline,
                       ),
@@ -298,7 +299,7 @@ class AuthPageState extends State<Autentificacion> {
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: const BorderSide(color: Colors.deepPurple),
+                    side: BorderSide(color: primaryColor.darker),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
@@ -307,9 +308,9 @@ class AuthPageState extends State<Autentificacion> {
                     
                     _mostrarVentanaInvitado(context);
                   },
-                  child: const Text(
+                  child:Text(
                     'Omitir por ahora',
-                    style: TextStyle(fontSize: 20, color: Colors.deepPurple),
+                    style: TextStyle(fontSize: 20, color: primaryColor.darker),
                   ),
                 ),
               ),

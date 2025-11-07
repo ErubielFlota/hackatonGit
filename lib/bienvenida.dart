@@ -1,9 +1,29 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:prueba2app/autentificacion.dart';
+import 'package:prueba2app/theme/colors.dart';
 
-
-class BienvenidaScreen extends StatelessWidget {
+class BienvenidaScreen extends StatefulWidget {
   const BienvenidaScreen({super.key});
+
+  @override
+  State<BienvenidaScreen> createState() => _BienvenidaScreenState();
+}
+
+class _BienvenidaScreenState extends State<BienvenidaScreen> {
+  bool _showSplash = true; // Controla qué pantalla mostrar
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Espera 3 segundos y cambia de splash a bienvenida
+    Timer(const Duration(seconds: 3), () {
+      setState(() {
+        _showSplash = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +41,8 @@ class BienvenidaScreen extends StatelessWidget {
                   children: [
                     
 
-                    Image.asset( 'bienestarbanner.png',
+                    Image.asset(
+                      'bienestarbanner.png',
                       fit: BoxFit.contain
                       
                     ),
@@ -87,5 +108,3 @@ class BienvenidaScreen extends StatelessWidget {
     );
   }
 }
-
-
