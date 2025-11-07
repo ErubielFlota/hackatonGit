@@ -27,13 +27,19 @@ Future<void> main2() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MiApoyo',
-      theme: ThemeData( useMaterial3: true),
-      debugShowCheckedModeBanner: false,
-      home:BienvenidaScreen()
+      title: 'Mi App',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF0078D0), // 🔹 tu color principal
+          primary: const Color(0xFF0078D0),
+          background: const Color(0xFFFBFCFB), // 🔸 fondo claro
+        ),
+        useMaterial3: true,
+      ),
+      home: const BienvenidaScreen(),
     );
   }
 }
