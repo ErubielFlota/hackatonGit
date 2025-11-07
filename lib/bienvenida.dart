@@ -47,7 +47,7 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            'assets/logo2.png', // asegúrate de tenerlo registrado en pubspec.yaml
+            'assets/logoblanco.png', // asegúrate de tenerlo registrado en pubspec.yaml
             width: 180,
             height: 180,
           ),
@@ -67,7 +67,7 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/logo_app.png',
+              'assets/logoazul.png',
               width: 140,
               height: 140,
             ),
