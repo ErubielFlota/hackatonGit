@@ -1,92 +1,122 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:prueba2app/autentificacion.dart';
 
-
-class BienvenidaScreen extends StatelessWidget {
+class BienvenidaScreen extends StatefulWidget {
   const BienvenidaScreen({super.key});
+
+  @override
+  State<BienvenidaScreen> createState() => _BienvenidaScreenState();
+}
+
+class _BienvenidaScreenState extends State<BienvenidaScreen> {
+  bool _showSplash = true; // Controla qué pantalla mostrar
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Espera 3 segundos y cambia de splash a bienvenida
+    Timer(const Duration(seconds: 3), () {
+      setState(() {
+        _showSplash = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const SizedBox(height: 30),
-              Expanded(
-                child: Column(
-                  children: [
-                    
+      backgroundColor:
+          _showSplash ? const Color(0xFF0078D0) : const Color(0xFFFBFCFB),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 800),
+        switchInCurve: Curves.easeInOut,
+        switchOutCurve: Curves.easeInOut,
+        child: _showSplash ? _buildSplashView() : _buildWelcomeView(context),
+      ),
+    );
+  }
 
-                    Image.asset(
-                      'bienestarbanner.png',
-                      fit: BoxFit.contain
-                      
-                    ),
-                    const SizedBox(height: 32),
+  // 🔹 Pantalla Splash (logo grande sobre fondo azul)
+  Widget _buildSplashView() {
+    return Center(
+      key: const ValueKey('splash'),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/logo2.png', // asegúrate de tenerlo registrado en pubspec.yaml
+            width: 180,
+            height: 180,
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
 
-
-                    Text(
-                      'Bienvenido',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue[900],
-                          ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Te presentamos una forma sencilla de conocer acerca de los programas y apoyos disponibles según el municipio del estado de Quintana Roo.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Colors.black54),
-                    ),
-                  ],
+  // 🔹 Pantalla de bienvenida (botón "COMENZAR")
+  Widget _buildWelcomeView(BuildContext context) {
+    return Center(
+      key: const ValueKey('welcome'),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/logo_app.png',
+              width: 140,
+              height: 140,
+            ),
+            const SizedBox(height: 30),
+            const Text(
+              'Bienvenido',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1565C0),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Te presentamos una forma sencilla de conocer acerca de los programas y apoyos disponibles según el municipio del estado de Quintana Roo.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 15, color: Colors.black54),
+            ),
+            const SizedBox(height: 40),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF1565C0),
+                elevation: 6,
+                shadowColor: const Color.fromARGB(255, 29, 129, 228).withOpacity(1),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              Column(
-                children: [
-                  FilledButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Autentificacion(),
-                        ),
-                      );
-                    },
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text('COMENZAR', style: TextStyle(fontSize: 16)),
-                  ),
-                  const SizedBox(height: 12),
-                  Column(
-                    children: const [
-                      SizedBox(height: 8),
-                      Text('© Derechos reservados 2025',
-                          style: TextStyle(color: Colors.grey)),
-                      SizedBox(height: 8),
-                      Text('MiApoyo',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.blue)),
-                    ],
-                  ),
-                ],
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const Autentificacion()),
+                );
+              },
+              child: const Text(
+                'COMENZAR',
+                style: TextStyle(fontSize: 16, color: Colors.white),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 60),
+            const Text(
+              'Derechos reservados 2025',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
-
