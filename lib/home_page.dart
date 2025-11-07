@@ -4,6 +4,7 @@ import 'package:prueba2app/profile_page.dart';
 import '/home_page_content.dart'; 
 import '/categories_page.dart';
 import 'formulario_quejas_sugerencias.dart';
+import '../theme/colors.dart';
 
 
 
@@ -83,20 +84,20 @@ class _HomePageState extends State<HomePage> {
       ),
       
       bottomNavigationBar: Container(
-        color: navBarBackgroundColor, 
+        color: primaryColor, 
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0), 
           child: GNav(
-            backgroundColor: navBarBackgroundColor,
+            backgroundColor: primaryColor,
             color: Colors.black54, 
-            tabBackgroundColor: colors[_currentIndex],
+            tabBackgroundColor: primaryColor.darker,
             selectedIndex: _currentIndex,
             tabBorderRadius: 50,
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
             
             onTabChange: _onTabChange, 
-            tabs: const [
+            tabs: [
               GButton(
                 icon: Icons.home,
                 text: 'Principal',
@@ -104,7 +105,7 @@ class _HomePageState extends State<HomePage> {
                 textColor: Colors.white,
               ),
               GButton(
-                icon: Icons.category,
+                icon: Icons.window,
                 text: 'Categorias',
                 iconActiveColor: Colors.white,
                 textColor: Colors.white,
