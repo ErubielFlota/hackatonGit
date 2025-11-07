@@ -230,7 +230,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
                   hintText: 'Busque un programa en específico',
                   prefixIcon: Icon(Icons.search, color: colors.primary),
                   filled: true,
-                  fillColor: colors.surface,
+                  fillColor: primaryColor.lighter.withOpacity(0.3),
                   contentPadding: const EdgeInsets.symmetric(
                       vertical: 12, horizontal: 16),
                   border: OutlineInputBorder(

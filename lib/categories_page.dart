@@ -83,7 +83,7 @@ class CategoriesPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: primaryColor.darker.withOpacity(0.1),
                               blurRadius: 8,
                               offset: const Offset(2, 4),
                             ),
@@ -112,7 +112,7 @@ class CategoriesPage extends StatelessWidget {
                               width: 30,
                               height: 3,
                               decoration: BoxDecoration(
-                                color: primaryColor,
+                                color: primaryColor.darker,
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),

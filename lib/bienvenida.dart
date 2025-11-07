@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:prueba2app/autentificacion.dart';
+import 'package:prueba2app/theme/colors.dart';
 
 class BienvenidaScreen extends StatefulWidget {
   const BienvenidaScreen({super.key});
@@ -28,7 +29,7 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          _showSplash ? const Color(0xFF0078D0) : const Color(0xFFFBFCFB),
+          _showSplash ? primaryColor : backgroundColor,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 800),
         switchInCurve: Curves.easeInOut,
@@ -76,7 +77,7 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1565C0),
+                color: primaryColor,
               ),
             ),
             const SizedBox(height: 10),
@@ -88,9 +89,9 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
             const SizedBox(height: 40),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF1565C0),
+                backgroundColor:primaryColor,
                 elevation: 6,
-                shadowColor: const Color.fromARGB(255, 29, 129, 228).withOpacity(1),
+                shadowColor: primaryColor.withOpacity(0.3),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
                 shape: RoundedRectangleBorder(
