@@ -144,7 +144,7 @@ class _FormularioQuejasSugerenciasPageState extends State<FormularioQuejasSugere
                 const Text('Programa del gobierno:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: programaSeleccionado,
+                  initialValue: programaSeleccionado,
                   hint: const Text('Selecciona un programa'),
                   items: programas.map((programa) {
                     return DropdownMenuItem(value: programa, child: Text(programa));

@@ -21,8 +21,7 @@ class BienvenidaScreen extends StatelessWidget {
                   children: [
                     
 
-                    Image.asset(
-                      'bienestarbanner.png',
+                    Image.asset( 'bienestarbanner.png',
                       fit: BoxFit.contain
                       
                     ),
