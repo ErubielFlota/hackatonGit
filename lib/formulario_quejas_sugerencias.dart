@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:prueba2app/autentificacion.dart';
 
 class FormularioQuejasSugerenciasPage extends StatefulWidget {
   const FormularioQuejasSugerenciasPage({super.key});
@@ -77,6 +79,62 @@ class _FormularioQuejasSugerenciasPageState extends State<FormularioQuejasSugere
 
   @override
   Widget build(BuildContext context) {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.lightBlueAccent,
+        automaticallyImplyLeading: false,
+        title: const Text("Quejas y Sugerencias",
+        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
+      ),
+      body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Debes iniciar sesión para acceder a esta página.',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 25),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Autentificacion(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Iniciar sesión',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+    );
+  }
+
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
