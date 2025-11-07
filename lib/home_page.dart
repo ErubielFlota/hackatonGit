@@ -4,6 +4,7 @@ import 'package:prueba2app/profile_page.dart';
 import '/home_page_content.dart'; 
 import '/categories_page.dart';
 import 'formulario_quejas_sugerencias.dart';
+import 'theme/colors.dart';
 
 
 
@@ -83,12 +84,12 @@ class _HomePageState extends State<HomePage> {
       ),
       
       bottomNavigationBar: Container(
-        color: navBarBackgroundColor, 
+        color: primaryColor, 
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0), 
           child: GNav(
-            backgroundColor: navBarBackgroundColor,
+            backgroundColor: primaryColor,
             color: Colors.black54, 
             tabBackgroundColor: colors[_currentIndex],
             selectedIndex: _currentIndex,

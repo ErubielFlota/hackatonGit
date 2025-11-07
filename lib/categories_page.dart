@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/colors.dart';
 import 'pages/mujeres_page.dart';
 import 'pages/educacion_page.dart';
 import 'pages/agricultura_page.dart';
@@ -14,96 +15,119 @@ class CategoriesPage extends StatelessWidget {
       {
         'title': 'Mujeres',
         'icon': Icons.female,
-        'color': Colors.pinkAccent,
         'page': const ProgramasMujeresPage(),
       },
       {
         'title': 'Educación',
         'icon': Icons.school,
-        'color': Colors.blueAccent,
         'page': const ProgramasEducacionPage(),
       },
       {
         'title': 'Agricultura',
         'icon': Icons.agriculture,
-        'color': Colors.green,
         'page': const AgriculturaPage(),
       },
       {
         'title': 'Vivienda',
         'icon': Icons.house,
-        'color': Colors.orangeAccent,
         'page': const ViviendaPage(),
       },
       {
         'title': 'Mayores de edad',
         'icon': Icons.elderly,
-        'color': Colors.purpleAccent,
         'page': const AdultosPage(),
       },
     ];
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-      appBar: AppBar(
-        backgroundColor: Colors.lightBlueAccent,
-        automaticallyImplyLeading: false,
-        title: const Text(
-          'Categorías de Programas',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          itemCount: categories.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 15,
-            mainAxisSpacing: 15,
-            childAspectRatio: 1.1,
-          ),
-          itemBuilder: (context, index) {
-            final category = categories[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => category['page']),
-                );
-              },
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                elevation: 1,
-                color: category['color'].withOpacity(0.2),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      category['icon'],
-                      size: 60,
-                      color: category['color'],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      category['title'],
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: category['color'],
-                      ),
-                    ),
-                  ],
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 10),
+              Text(
+                'Categorías de Programas',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: textColor,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            );
-          },
+              const SizedBox(height: 25),
+              Expanded(
+                child: GridView.builder(
+                  itemCount: categories.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                    childAspectRatio: 1,
+                  ),
+                  itemBuilder: (context, index) {
+                    final category = categories[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => category['page']),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: primaryColor.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(2, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              category['icon'],
+                              size: 55,
+                              color: primaryColor.darker,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              category['title'],
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Container(
+                              width: 30,
+                              height: 3,
+                              decoration: BoxDecoration(
+                                color: primaryColor,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+

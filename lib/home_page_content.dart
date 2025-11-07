@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:prueba2app/theme/colors.dart';
 
 class Programa {
-  final String id; 
+  final String id;
   final String nombre;
-  final String imagenUrl; 
+  final String imagenUrl;
   final String descripcion;
   final DateTime inicio;
   final DateTime fin;
-  final String localidad; 
-  final String categoria; 
+  final String localidad;
+  final String categoria;
 
   Programa({
     required this.id,
@@ -20,19 +20,14 @@ class Programa {
     required this.inicio,
     required this.fin,
     required this.localidad,
-    required this.categoria, 
+    required this.categoria,
   });
 
-  
   factory Programa.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>?;
 
-    
-    if (data == null) {
-      throw Exception("Documento de Firestore no contiene datos.");
-    }
+    if (data == null) throw Exception("Documento sin datos.");
 
-    
     final inicioTimestamp = data['inicio'] as Timestamp?;
     final finTimestamp = data['fin'] as Timestamp?;
 
@@ -40,15 +35,16 @@ class Programa {
       id: doc.id,
       nombre: data['titulo'] ?? 'Programa sin nombre',
       descripcion: data['descripcion'] ?? 'Sin descripción.',
-      imagenUrl: data['imagenUrl'] ?? 'https://placehold.co/70x70/223399/FFFFFF?text=P',
+      imagenUrl: data['imagenUrl'] ??
+          'https://placehold.co/70x70/223399/FFFFFF?text=P',
       inicio: inicioTimestamp?.toDate() ?? DateTime.now(),
-      fin: finTimestamp?.toDate() ?? DateTime.now().add(const Duration(days: 365)),
+      fin: finTimestamp?.toDate() ??
+          DateTime.now().add(const Duration(days: 365)),
       localidad: data['localidad'] ?? 'Todas las localidades',
       categoria: data['categoria'] ?? 'Sin Categoría',
     );
   }
 
-  
   String estadoActual() {
     final ahora = DateTime.now();
     if (ahora.isBefore(inicio)) return 'Próximamente';
@@ -57,24 +53,24 @@ class Programa {
   }
 }
 
-
 class ProgramaDetailPage extends StatelessWidget {
   final Programa programa;
   const ProgramaDetailPage({super.key, required this.programa});
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(programa.nombre),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: colors.primary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Image.network(
@@ -85,9 +81,10 @@ class ProgramaDetailPage extends StatelessWidget {
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     height: 200,
-                    color: Colors.grey.shade300,
-                    child: const Center(
-                      child: Icon(Icons.error, size: 40, color: Colors.blueGrey),
+                    color: colors.surfaceVariant,
+                    child: Center(
+                      child: Icon(Icons.error,
+                          size: 40, color: colors.onSurfaceVariant),
                     ),
                   );
                 },
@@ -95,20 +92,21 @@ class ProgramaDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            
+            // Estado del programa
             Align(
               alignment: Alignment.centerLeft,
               child: Container(
                 decoration: BoxDecoration(
-                  color: (programa.estadoActual() == 'Activo' ? Colors.green : Colors.amber).withOpacity(0.15),
-                  border: Border.all(color: programa.estadoActual() == 'Activo' ? Colors.green : Colors.amber),
+                  color: colors.secondaryContainer,
+                  border: Border.all(color: colors.secondary),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: Text(
                   programa.estadoActual(),
                   style: TextStyle(
-                    color: programa.estadoActual() == 'Activo' ? Colors.green : Colors.amber,
+                    color: colors.onSecondaryContainer,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -120,44 +118,53 @@ class ProgramaDetailPage extends StatelessWidget {
             Text(
               programa.nombre,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blueGrey[800],
-                    ),
+                    fontWeight: FontWeight.bold,
+                    color: colors.onBackground,
+                  ),
             ),
             const Divider(height: 30, thickness: 1),
 
-            
-            const Text(
+            Text(
               'Detalles del Programa:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colors.onBackground,
+                  ),
             ),
             const SizedBox(height: 10),
             Text(
               programa.descripcion,
-              style: const TextStyle(fontSize: 16, height: 1.5),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: colors.onSurface),
             ),
-
             const SizedBox(height: 20),
-            
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.location_on, color: Colors.blueAccent),
-              title: Text('Localidad', style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text(programa.localidad, style: TextStyle(fontSize: 16)),
-            ),
 
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.label, color: Colors.indigo), 
-              title: Text('Categoría', style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text(programa.categoria, style: TextStyle(fontSize: 16)),
+              leading: Icon(Icons.location_on, color: colors.primary),
+              title: Text('Localidad',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: colors.onBackground)),
+              subtitle: Text(programa.localidad,
+                  style: TextStyle(color: colors.onSurface)),
             ),
-            
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.label, color: colors.primary),
+              title: Text('Categoría',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: colors.onBackground)),
+              subtitle: Text(programa.categoria,
+                  style: TextStyle(color: colors.onSurface)),
+            ),
+
             const SizedBox(height: 10),
-
-
-            Text('Inicia: ${programa.inicio.toString().split(' ')[0]}', style: const TextStyle(color: Colors.grey)),
-            Text('Finaliza: ${programa.fin.toString().split(' ')[0]}', style: const TextStyle(color: Colors.grey)),
+            Text('Inicia: ${programa.inicio.toString().split(' ')[0]}',
+                style: TextStyle(color: colors.outline)),
+            Text('Finaliza: ${programa.fin.toString().split(' ')[0]}',
+                style: TextStyle(color: colors.outline)),
           ],
         ),
       ),
@@ -165,9 +172,8 @@ class ProgramaDetailPage extends StatelessWidget {
   }
 }
 
-
 const List<String> _localidadesDisponibles = [
-  'Todas las Localidades', 
+  'Todas las Localidades',
   'Othón P. Blanco',
   'Felipe Carrillo Puerto',
   'José María Morelos',
@@ -190,41 +196,41 @@ class PrincipalPage extends StatefulWidget {
 
 class _PrincipalPageState extends State<PrincipalPage> {
   String filtro = '';
-  String _localidadSeleccionada = _localidadesDisponibles.first; 
-  
+  String _localidadSeleccionada = _localidadesDisponibles.first;
+
   final CollectionReference _programasCollection =
       FirebaseFirestore.instance.collection('programas');
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
               Center(
                 child: Text(
                   'Programas disponibles',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey[800],
-                        ),
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor.darker,
+                      ),
                 ),
               ),
               const SizedBox(height: 16),
 
-              
-              // Barra de Búsqueda por Nombre
+              // Barra de búsqueda
               TextField(
                 decoration: InputDecoration(
                   hintText: 'Busque un programa en específico',
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: Icon(Icons.search, color: colors.primary),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colors.surface,
                   contentPadding: const EdgeInsets.symmetric(
                       vertical: 12, horizontal: 16),
                   border: OutlineInputBorder(
@@ -237,21 +243,23 @@ class _PrincipalPageState extends State<PrincipalPage> {
                 },
               ),
               const SizedBox(height: 16),
-              
-              // Selector de Localidad 
+
+              // Selector de Localidad
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colors.surface,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: colors.outlineVariant),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     isExpanded: true,
                     value: _localidadSeleccionada,
-                    icon: const Icon(Icons.arrow_drop_down, color: Colors.blueAccent),
-                    style: TextStyle(color: Colors.blueGrey[800], fontSize: 16),
+                    icon:
+                        Icon(Icons.arrow_drop_down, color: colors.onSurface),
+                    style: TextStyle(color: colors.onSurface, fontSize: 16),
                     onChanged: (String? newValue) {
                       setState(() {
                         _localidadSeleccionada = newValue!;
@@ -269,9 +277,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
               ),
               const SizedBox(height: 16),
 
-
-              
-              // Lista de Programas 
+              // Lista de programas
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: _programasCollection.snapshots(),
@@ -282,60 +288,52 @@ class _PrincipalPageState extends State<PrincipalPage> {
 
                     if (snapshot.hasError) {
                       return Center(
-                        child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)),
+                        child: Text('Error: ${snapshot.error}',
+                            style: TextStyle(color: colors.error)),
                       );
                     }
 
                     final allPrograms = snapshot.data!.docs
                         .map((doc) => Programa.fromFirestore(doc))
                         .toList();
-                    
-                    
-                    final programasFiltrados = allPrograms
-                        .where((p) {
-                          
-                          final filtroNombre = p.nombre.toLowerCase().contains(filtro.toLowerCase());
 
-                          
-                          final filtroLocalidad = _localidadSeleccionada == _localidadesDisponibles.first 
-                              ? true 
-                              : p.localidad == _localidadSeleccionada; 
-
-                          return filtroNombre && filtroLocalidad;
-                        })
-                        .toList();
+                    final programasFiltrados = allPrograms.where((p) {
+                      final filtroNombre =
+                          p.nombre.toLowerCase().contains(filtro.toLowerCase());
+                      final filtroLocalidad =
+                          _localidadSeleccionada == _localidadesDisponibles.first
+                              ? true
+                              : p.localidad == _localidadSeleccionada;
+                      return filtroNombre && filtroLocalidad;
+                    }).toList();
 
                     if (programasFiltrados.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Text(
-                          'No se encontraron programas con esos criterios.',
-                          style: TextStyle(color: Colors.black54),
+                          'No se encontraron programas.',
+                          style: TextStyle(color: colors.onSurfaceVariant),
                         ),
                       );
                     }
 
-                    
                     return AnimatedSwitcher(
                       duration: const Duration(milliseconds: 400),
-                      key: ValueKey(filtro + _localidadSeleccionada), 
+                      key: ValueKey(filtro + _localidadSeleccionada),
                       child: ListView.builder(
                         itemCount: programasFiltrados.length,
                         itemBuilder: (context, index) {
                           final programa = programasFiltrados[index];
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ProgramaDetailPage(programa: programa),
-                                  ),
-                                );
-                              },
-                              child: ProgramaCard(programa: programa),
-                            ),
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ProgramaDetailPage(programa: programa),
+                                ),
+                              );
+                            },
+                            child: ProgramaCard(programa: programa),
                           );
                         },
                       ),
@@ -351,35 +349,29 @@ class _PrincipalPageState extends State<PrincipalPage> {
   }
 }
 
-
 class ProgramaCard extends StatelessWidget {
   final Programa programa;
   const ProgramaCard({super.key, required this.programa});
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final estado = programa.estadoActual();
-    final colorEstado = switch (estado) {
-      'Activo' => Colors.green,
-      'Próximamente' => Colors.amber,
-      _ => Colors.red,
-    };
 
-    final etiqueta = switch (estado) {
-      'Activo' => 'Activo',
-      'Próximamente' => 'Próximamente',
-      _ => 'Finalizado',
+    final colorEstado = switch (estado) {
+      'Activo' => colors.primary,
+      'Próximamente' => colors.secondary,
+      _ => colors.error,
     };
 
     return Card(
-      elevation: 3,
+      elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
@@ -387,27 +379,16 @@ class ProgramaCard extends StatelessWidget {
                 width: 70,
                 height: 70,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  
-                  return Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.image_not_supported,
-                      color: Colors.grey,
-                      size: 40,
-                    ),
-                  );
-                },
+                errorBuilder: (context, error, stackTrace) => Container(
+                  width: 70,
+                  height: 70,
+                  color: colors.surfaceVariant,
+                  child: Icon(Icons.image_not_supported,
+                      color: colors.onSurfaceVariant, size: 40),
+                ),
               ),
             ),
             const SizedBox(width: 12),
-
-            
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,72 +396,67 @@ class ProgramaCard extends StatelessWidget {
                   Text(
                     programa.nombre,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.blueGrey[800],
+                          color: colors.onSurface,
                           fontWeight: FontWeight.w600,
                         ),
                   ),
                   const SizedBox(height: 6),
-
-                 
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 14, color: Colors.blueGrey),
+                      Icon(Icons.location_on, size: 14, color: colors.primary),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           programa.localidad,
-                          style: TextStyle(fontSize: 13, color: Colors.blueGrey[700]),
-                          overflow: TextOverflow.ellipsis, 
+                          style: TextStyle(fontSize: 13, color: colors.onSurface),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
-                 
                   Row(
                     children: [
-                      const Icon(Icons.label_outline, size: 14, color: Colors.indigo),
+                      Icon(Icons.label_outline,
+                          size: 14, color: colors.secondary),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           programa.categoria,
-                          style: TextStyle(fontSize: 13, color: Colors.indigo[700]),
-                          overflow: TextOverflow.ellipsis, 
+                          style: TextStyle(fontSize: 13, color: colors.onSurface),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
-                  
                   const SizedBox(height: 6),
-                  
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: colorEstado.withOpacity(0.15),
-                        border: Border.all(color: colorEstado),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      child: Text(
-                        etiqueta,
-                        style: TextStyle(
-                          color: colorEstado,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: colorEstado.withOpacity(0.15),
+                      border: Border.all(color: colorEstado),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    child: Text(
+                      estado,
+                      style: TextStyle(
+                        color: colorEstado,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.blueGrey),
+            Icon(Icons.arrow_forward_ios,
+                size: 16, color: colors.onSurfaceVariant),
           ],
         ),
       ),
     );
   }
 }
+
 
 
