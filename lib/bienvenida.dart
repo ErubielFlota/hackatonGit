@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'package:prueba2app/autentificacion.dart';
 import 'package:prueba2app/theme/colors.dart';
 
 class BienvenidaScreen extends StatefulWidget {
-  const BienvenidaScreen({super.key});
+const BienvenidaScreen({super.key});
 
   @override
-  State<BienvenidaScreen> createState() => _BienvenidaScreenState();
-}
+   State<BienvenidaScreen> createState() => _BienvenidaScreenState();
+ }
 
 class _BienvenidaScreenState extends State<BienvenidaScreen> {
   // 1. Declarar el Timer como campo de la clase
@@ -17,7 +17,7 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
 
   @override
   void initState() {
-    super.initState();
+   super.initState();
 
     // 2. Asignar la referencia al Timer
     _timer = Timer(const Duration(seconds: 3), () {
@@ -51,23 +51,24 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
     );
   }
 
-  // 🔹 Pantalla Splash (logo grande sobre fondo azul)
+// <<<<<<< ramacambios
+//   // 🔹 Pantalla Splash (logo grande sobre fondo azul)
   Widget _buildSplashView() {
     return Center(
       key: const ValueKey('splash'),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+     child: Column(
+         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
             'assets/logoblanco.png', // asegúrate de tenerlo registrado en pubspec.yaml
             width: 180,
-            height: 180,
-          ),
-          const SizedBox(height: 20),
+           height: 180,
+         ),
+           const SizedBox(height: 20),
         ],
       ),
-    );
-  }
+     );
+   }
 
   // 🔹 Pantalla de bienvenida (botón "COMENZAR")
   Widget _buildWelcomeView(BuildContext context) {
