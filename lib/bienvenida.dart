@@ -11,25 +11,37 @@ class BienvenidaScreen extends StatefulWidget {
 }
 
 class _BienvenidaScreenState extends State<BienvenidaScreen> {
+  // 1. Declarar el Timer como campo de la clase
+  late Timer _timer;
   bool _showSplash = true; // Controla qué pantalla mostrar
 
   @override
   void initState() {
     super.initState();
 
-    // Espera 3 segundos y cambia de splash a bienvenida
-    Timer(const Duration(seconds: 3), () {
-      setState(() {
-        _showSplash = false;
-      });
+    // 2. Asignar la referencia al Timer
+    _timer = Timer(const Duration(seconds: 3), () {
+      // Usamos 'mounted' como una doble seguridad, aunque 'dispose' debería cancelar el timer.
+      if (mounted) {
+        setState(() {
+          _showSplash = false;
+        });
+      }
     });
   }
 
   @override
+  void dispose() {
+    // 3. ¡Solución! Cancelar el Timer cuando el widget se desecha
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Nota: 'primaryColor' y 'backgroundColor' se asume que están definidos en 'colors.dart'
     return Scaffold(
-      backgroundColor:
-          _showSplash ? primaryColor : backgroundColor,
+      backgroundColor: _showSplash ? primaryColor : backgroundColor,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 800),
         switchInCurve: Curves.easeInOut,
@@ -89,7 +101,7 @@ class _BienvenidaScreenState extends State<BienvenidaScreen> {
             const SizedBox(height: 40),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor:primaryColor,
+                backgroundColor: primaryColor,
                 elevation: 6,
                 shadowColor: primaryColor.withOpacity(0.3),
                 padding:

@@ -2,7 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:prueba2app/bienvenida.dart';
 import 'package:prueba2app/firebase_options.dart';
-import 'package:prueba2app/theme/colors.dart'; // Importas los colores globales
+import 'package:prueba2app/theme/colors.dart'; 
+import 'auth_checker.dart'; // ¡Importamos el comprobador de estado!
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +30,9 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const BienvenidaScreen(),
+      // CAMBIO CLAVE: Usamos el AuthChecker como pantalla inicial.
+      // El AuthChecker decidirá entre HomePage y Autentificacion (Login).
+      home: const AuthChecker(),
     );
   }
 }
