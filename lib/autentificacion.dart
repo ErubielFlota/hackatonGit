@@ -192,7 +192,7 @@ class AuthPageState extends State<Autentificacion> {
             );
           }
         } else {
-          // Falla: El usuario ha iniciado sesión pero el correo NO está verificado
+          //El usuario ha iniciado sesión pero el correo NO está verificado
           if (mounted) {
             // Mostrar diálogo para pedirle que verifique y dar opciones
             _showVerificationPendingDialog(user);
