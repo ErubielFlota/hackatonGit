@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'firebase_auth_dart.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'autentificacion.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -32,13 +34,23 @@ class _RegisterPageState extends State<RegisterPage> {
     final email = _correoController.text.trim();
     final password = _contrasenaController.text.trim();
 
+    // Requerimos que al menos el nombre, correo y contraseña no estén vacios 
     if (email.isEmpty || password.isEmpty || _nombreController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor, completa todos los campos requeridos.'),
+          content: Text('Por favor, completa el nombre, correo y contraseña.'),
         ),
       );
       return;
+    }
+    
+    if (password.length < 6) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('La contraseña debe tener al menos 6 caracteres.'),
+            ),
+        );
+        return;
     }
 
     setState(() {
@@ -49,24 +61,47 @@ class _RegisterPageState extends State<RegisterPage> {
       await _authService.register(email, password);
 
       if (mounted) {
+        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(' Cuenta creada correctamente.'),
+            content: Text('¡Cuenta creada! Revisa tu correo electrónico para verificar tu cuenta antes de iniciar sesión.'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 8),
           ),
         );
-        //CON ESTO PODEMOS HACER QUE AL CREAR UNA CUENTA, TE REGRESE A LA PAGINA DE INICIO DE SESION
-        Navigator.pop(context);
+        
+         
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const Autentificacion()),
+        );
       }
 
 
-    } catch (e) {
-      
-      String errorMessage = 'Error al crear la cuenta. Inténtalo de nuevo.';
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
 
+      
+      if (e.code == 'email-already-in-use') {
+        errorMessage = 'El correo electrónico ya está registrado.';
+      } else if (e.code == 'weak-password') {
+        errorMessage = 'La contraseña es demasiado débil (mínimo 6 caracteres).';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'El formato del correo electrónico es inválido.';
+      }
+       else {
+        errorMessage = 'Error al crear la cuenta. Inténtalo de nuevo.';
+      }
+      
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(errorMessage)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Ocurrió un error inesperado.')));
       }
     } finally {
       if (mounted) {

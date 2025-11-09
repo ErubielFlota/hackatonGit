@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'autentificacion.dart'; 
+import 'autentificacion.dart';
+import 'bienvenida.dart'; 
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -10,12 +11,14 @@ class ProfilePage extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
+      // Código para usuario no autenticado
       return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.lightBlueAccent,
           automaticallyImplyLeading: false,
-          title: const Text('Mi perfil',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          title: const Text(
+            'Mi perfil',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           ),
           centerTitle: true,
         ),
@@ -43,7 +46,8 @@ class ProfilePage extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -63,15 +67,24 @@ class ProfilePage extends StatelessWidget {
       );
     }
 
+    // Código para usuario autenticado
     return Scaffold(
       appBar: AppBar(
+        
         title: const Text('Mi perfil'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
-              Navigator.pop(context);
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (context) => const BienvenidaScreen()), 
+                  (Route<dynamic> route) =>
+                      false,
+                );
+              }
             },
           ),
         ],

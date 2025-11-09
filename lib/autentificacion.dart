@@ -3,11 +3,11 @@ import 'package:prueba2app/home_page.dart';
 import 'package:prueba2app/theme/colors.dart';
 import 'firebase_auth_dart.dart';
 import 'register.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Autentificacion extends StatefulWidget {
   const Autentificacion({super.key});
   
-
   @override
   State<Autentificacion> createState() => AuthPageState();
 }
@@ -26,8 +26,75 @@ class AuthPageState extends State<Autentificacion> {
     super.dispose();
   }
 
-  
-  // Función para mostrar ventana de invitado
+
+  void _showVerificationPendingDialog(User user) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          title: const Text("Verificación de Correo Requerida", textAlign: TextAlign.center),
+          content: const Text(
+            "Tu correo electrónico no ha sido verificado. Por favor, revisa tu bandeja de entrada (o spam) y haz clic en el enlace de verificación.",
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Reenviar Correo', style: TextStyle(color: Colors.orange)),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                setState(() => _isLoading = true);
+                try {
+                  await user.sendEmailVerification();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Correo de verificación reenviado con éxito.')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Error al reenviar el correo.')),
+                  );
+                } finally {
+                  setState(() => _isLoading = false);
+                }
+              },
+            ),
+            TextButton(
+              child: const Text('Ya Verifiqué'),
+              onPressed: () async {
+               
+                await user.reload();
+                User? reloadedUser = FirebaseAuth.instance.currentUser;
+
+                Navigator.of(context).pop();
+
+                if (reloadedUser != null && reloadedUser.emailVerified) {
+                 
+                  if (mounted) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const HomePage()),
+                    );
+                  }
+                } else {
+                 
+                  if (mounted) {
+                    _showVerificationPendingDialog(user);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Sigue pendiente la verificación. Por favor, inténtalo de nuevo.')),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
   void _mostrarVentanaInvitado(BuildContext context) {
     showDialog(
       context: context,
@@ -75,7 +142,7 @@ class AuthPageState extends State<Autentificacion> {
                     onPressed: () {
                       
                       Navigator.pop(context); 
-                      Navigator.pushReplacement( // Usamos pushReplacement para evitar volver a la página de login con el botón de atrás
+                      Navigator.pushReplacement( 
                         context,
                         MaterialPageRoute(builder: (context) => const HomePage()),
                       );
@@ -98,6 +165,7 @@ class AuthPageState extends State<Autentificacion> {
     );
   }
 
+
   Future<void> _handleSignIn() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -110,20 +178,47 @@ class AuthPageState extends State<Autentificacion> {
       _isLoading = true;
     });
 
+    User? user;
     try {
-      await _authService.signIn(_emailController.text, _passwordController.text);
+      user = await _authService.signIn(_emailController.text, _passwordController.text);
       
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomePage()), 
-        );
+      if (user != null) {
+        // Verificar si el email ha sido verificado
+        if (user.emailVerified) {
+          // El usuario ha iniciado sesión y su correo está verificado
+          if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const HomePage()), 
+            );
+          }
+        } else {
+          // Falla: El usuario ha iniciado sesión pero el correo NO está verificado
+          if (mounted) {
+            // Mostrar diálogo para pedirle que verifique y dar opciones
+            _showVerificationPendingDialog(user);
+          }
+        }
       }
 
-    } catch (e) {
+    } on FirebaseAuthException catch (e) {
       if (mounted) {
-        String errorMessage = 'Error al iniciar sesión. Verifica tus datos.';
+        String errorMessage;
+        if (e.code == 'user-not-found') {
+          errorMessage = 'No se encontró una cuenta con ese correo.';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = 'Contraseña incorrecta.';
+        } else {
+          errorMessage = 'Error al iniciar sesión. Verifica tus datos.';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ocurrió un error inesperado al iniciar sesión.')),
         );
       }
     } finally {
@@ -155,7 +250,7 @@ class AuthPageState extends State<Autentificacion> {
               ),
               const SizedBox(height: 50),
 
-             
+              
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -180,7 +275,7 @@ class AuthPageState extends State<Autentificacion> {
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: 'Contraseña',
-                  prefixIcon:  Icon(Icons.lock, color: primaryColor.darker),
+                  prefixIcon: Icon(Icons.lock, color: primaryColor.darker),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(color: Colors.grey),

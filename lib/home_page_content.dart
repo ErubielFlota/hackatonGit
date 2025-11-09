@@ -81,7 +81,7 @@ class ProgramaDetailPage extends StatelessWidget {
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     height: 200,
-                    color: colors.surfaceVariant,
+                    color: colors.surfaceContainerHighest,
                     child: Center(
                       child: Icon(Icons.error,
                           size: 40, color: colors.onSurfaceVariant),
@@ -119,7 +119,7 @@ class ProgramaDetailPage extends StatelessWidget {
               programa.nombre,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: colors.onBackground,
+                    color: colors.onSurface,
                   ),
             ),
             const Divider(height: 30, thickness: 1),
@@ -128,7 +128,7 @@ class ProgramaDetailPage extends StatelessWidget {
               'Detalles del Programa:',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: colors.onBackground,
+                    color: colors.onSurface,
                   ),
             ),
             const SizedBox(height: 10),
@@ -146,7 +146,7 @@ class ProgramaDetailPage extends StatelessWidget {
               leading: Icon(Icons.location_on, color: colors.primary),
               title: Text('Localidad',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, color: colors.onBackground)),
+                      fontWeight: FontWeight.bold, color: colors.onSurface)),
               subtitle: Text(programa.localidad,
                   style: TextStyle(color: colors.onSurface)),
             ),
@@ -155,7 +155,7 @@ class ProgramaDetailPage extends StatelessWidget {
               leading: Icon(Icons.label, color: colors.primary),
               title: Text('Categoría',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, color: colors.onBackground)),
+                      fontWeight: FontWeight.bold, color: colors.onSurface)),
               subtitle: Text(programa.categoria,
                   style: TextStyle(color: colors.onSurface)),
             ),
@@ -206,7 +206,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -382,7 +382,7 @@ class ProgramaCard extends StatelessWidget {
                 errorBuilder: (context, error, stackTrace) => Container(
                   width: 70,
                   height: 70,
-                  color: colors.surfaceVariant,
+                  color: colors.surfaceContainerHighest,
                   child: Icon(Icons.image_not_supported,
                       color: colors.onSurfaceVariant, size: 40),
                 ),
