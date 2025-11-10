@@ -1,13 +1,10 @@
-//archivo donde tengo creado los metodos para registro de los usuarios
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 class AuthServiceImpl {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // --- FUNCIÓN DE INICIO DE SESIÓN MODIFICADA ---
-  // Ahora devuelve User? para facilitar la comprobación de emailVerified
+  // --- FUNCIÓN DE INICIO de SESIÓN (Sin cambios) ---
   Future<User?> signIn(String email, String password) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -15,11 +12,9 @@ class AuthServiceImpl {
         password: password,
       );
       
-      // Devolvemos el objeto User asociado al inicio de sesión
       return userCredential.user; 
     } on FirebaseAuthException catch (e) {
       debugPrint('Error en inicio de sesión: ${e.code}');
-      // Usamos rethrow para que la UI pueda manejar los códigos de error específicos.
       rethrow; 
     } catch (e) {
       debugPrint('Error desconocido en signIn: $e');
@@ -27,8 +22,7 @@ class AuthServiceImpl {
     }
   }
 
-  // --- FUNCIÓN DE REGISTRO MODIFICADA ---
-  // Ahora envía el correo de verificación y devuelve User?
+  // --- FUNCIÓN DE REGISTRO (Sin cambios) ---
   Future<User?> register(String email, String password) async {
     try {
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
@@ -38,8 +32,6 @@ class AuthServiceImpl {
       
       User? user = userCredential.user;
       
-      // ** PASO CLAVE: ENVIAR VERIFICACIÓN POR CORREO **
-      // Esto dispara el correo electrónico de Firebase al usuario recién registrado.
       await user?.sendEmailVerification();
       
       return user;
@@ -48,6 +40,19 @@ class AuthServiceImpl {
       rethrow;
     } catch (e) {
       debugPrint('Error desconocido en register: $e');
+      rethrow;
+    }
+  }
+
+  // --- ¡NUEVA FUNCIÓN AÑADIDA! ---
+  // Esta es la lógica pura para enviar el correo.
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      // Deja que la UI (la página de login) maneje los códigos de error
+      rethrow;
+    } catch (e) {
       rethrow;
     }
   }

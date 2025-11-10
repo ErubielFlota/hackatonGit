@@ -28,6 +28,7 @@ class AuthPageState extends State<Autentificacion> {
 
 
   void _showVerificationPendingDialog(User user) {
+    // (Tu código original - Sin cambios)
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -63,21 +64,21 @@ class AuthPageState extends State<Autentificacion> {
             TextButton(
               child: const Text('Ya Verifiqué'),
               onPressed: () async {
-               
+                
                 await user.reload();
                 User? reloadedUser = FirebaseAuth.instance.currentUser;
 
                 Navigator.of(context).pop();
 
                 if (reloadedUser != null && reloadedUser.emailVerified) {
-                 
+                  
                   if (mounted) {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(builder: (context) => const HomePage()),
                     );
                   }
                 } else {
-                 
+                  
                   if (mounted) {
                     _showVerificationPendingDialog(user);
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -96,6 +97,7 @@ class AuthPageState extends State<Autentificacion> {
 
 
   void _mostrarVentanaInvitado(BuildContext context) {
+    // (Tu código original - Sin cambios)
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -167,6 +169,7 @@ class AuthPageState extends State<Autentificacion> {
 
 
   Future<void> _handleSignIn() async {
+    // (Tu código original - Sin cambios)
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, ingresa tu correo y contraseña.')),
@@ -183,18 +186,14 @@ class AuthPageState extends State<Autentificacion> {
       user = await _authService.signIn(_emailController.text, _passwordController.text);
       
       if (user != null) {
-        // Verificar si el email ha sido verificado
         if (user.emailVerified) {
-          // El usuario ha iniciado sesión y su correo está verificado
           if (mounted) {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => const HomePage()), 
             );
           }
         } else {
-          //El usuario ha iniciado sesión pero el correo NO está verificado
           if (mounted) {
-            // Mostrar diálogo para pedirle que verifique y dar opciones
             _showVerificationPendingDialog(user);
           }
         }
@@ -229,6 +228,112 @@ class AuthPageState extends State<Autentificacion> {
       }
     }
   }
+
+  // ----- INICIO DEL CÓDIGO AÑADIDO -----
+
+  Future<void> _enviarCorreoReseteo(String email, BuildContext dialogContext) async {
+    // Este 'dialogContext' es el contexto del Pop-Up
+    
+    // Muestra un indicador de carga DENTRO del Pop-Up
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+  
+    if (email.isEmpty) {
+      Navigator.pop(context); // Oculta el indicador de carga
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, ingresa tu correo.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+  
+    try {
+      // 1. Llama a tu servicio
+      await _authService.sendPasswordResetEmail(email);
+  
+      Navigator.pop(context); // Oculta el indicador de carga
+      Navigator.pop(dialogContext); // Cierra el pop-up de reseteo
+  
+      // 2. Avisa al usuario
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Correo enviado! Revisa tu bandeja de entrada.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      Navigator.pop(context); // Oculta el indicador de carga
+      
+      // 3. Maneja errores
+      String mensaje = 'Ocurrió un error. Intenta de nuevo.';
+      if (e.code == 'user-not-found') {
+        mensaje = 'No se encontró ningún usuario con ese correo electrónico.';
+      } else if (e.code == 'invalid-email') {
+        mensaje = 'El formato del correo es inválido.';
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensaje), backgroundColor: Colors.redAccent),
+      );
+    } catch (e) {
+      Navigator.pop(context); // Oculta el indicador de carga
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ocurrió un error: $e'), backgroundColor: Colors.redAccent),
+      );
+    }
+  }
+
+  // Esta función muestra el Pop-Up (AlertDialog)
+  void _mostrarDialogoReseteo() {
+    final TextEditingController _correoReseteoController = TextEditingController();
+  
+    showDialog(
+      context: context,
+      builder: (dialogContext) { // Usamos un 'dialogContext' diferente
+        return AlertDialog(
+          title: const Text('Restablecer Contraseña'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                  'Ingresa tu correo y te enviaremos un link para restablecer tu contraseña.'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _correoReseteoController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Correo Electrónico',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext), // Usa dialogContext
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Llama a la función de lógica
+                _enviarCorreoReseteo(
+                    _correoReseteoController.text.trim(), dialogContext);
+              },
+              child: const Text('Enviar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  // ----- FIN DEL CÓDIGO AÑADIDO -----
+
 
   @override
   Widget build(BuildContext context) {
@@ -288,15 +393,14 @@ class AuthPageState extends State<Autentificacion> {
                 obscureText: true,
               ),
               const SizedBox(height: 10),
-
               
+              // ----- AQUÍ ESTÁ EL BOTÓN AÑADIDO -----
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Funcionalidad de recuperar contraseña pendiente')),
-                    );
+                    // Llama a la función que muestra el pop-up
+                    _mostrarDialogoReseteo();
                   },
                   child: Text(
                     '¿Has olvidado tu contraseña?',
