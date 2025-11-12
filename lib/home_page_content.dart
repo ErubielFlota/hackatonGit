@@ -358,11 +358,12 @@ class ProgramaCard extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final estado = programa.estadoActual();
 
-    final colorEstado = switch (estado) {
+        final colorEstado = switch (estado) {
       'Activo' => colors.primary,
-      'Próximamente' => colors.secondary,
-      _ => colors.error,
+      'Próximamente' => colors.secondary, 
+      _=> colors.error,
     };
+
 
     return Card(
       elevation: 2,

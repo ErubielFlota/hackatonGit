@@ -290,7 +290,7 @@ class AuthPageState extends State<Autentificacion> {
 
   // Esta función muestra el Pop-Up (AlertDialog)
   void _mostrarDialogoReseteo() {
-    final TextEditingController _correoReseteoController = TextEditingController();
+    final TextEditingController correoReseteoController = TextEditingController();
   
     showDialog(
       context: context,
@@ -304,7 +304,7 @@ class AuthPageState extends State<Autentificacion> {
                   'Ingresa tu correo y te enviaremos un link para restablecer tu contraseña.'),
               const SizedBox(height: 16),
               TextField(
-                controller: _correoReseteoController,
+                controller: correoReseteoController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
                   labelText: 'Correo Electrónico',
@@ -322,7 +322,7 @@ class AuthPageState extends State<Autentificacion> {
               onPressed: () {
                 // Llama a la función de lógica
                 _enviarCorreoReseteo(
-                    _correoReseteoController.text.trim(), dialogContext);
+                    correoReseteoController.text.trim(), dialogContext);
               },
               child: const Text('Enviar'),
             ),

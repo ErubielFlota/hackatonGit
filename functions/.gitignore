@@ -1,2 +1,5 @@
 node_modules/
 *.local
+
+# Ignorar llaves secretas de Firebase/Google
+functions/service-account.json

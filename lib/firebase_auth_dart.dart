@@ -49,7 +49,7 @@ class AuthServiceImpl {
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException {
       // Deja que la UI (la página de login) maneje los códigos de error
       rethrow;
     } catch (e) {

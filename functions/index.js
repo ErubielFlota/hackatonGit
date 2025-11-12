@@ -1,32 +1,76 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+// --- IMPORTACIONES BÁSICAS ---
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const { SessionsClient } = require("@google-cloud/dialogflow");
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
-const logger = require("firebase-functions/logger");
+// Inicializar Firebase Admin
+admin.initializeApp();
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+// Configurar Express
+const app = express();
+app.use(cors({ origin: true }));
+app.use(bodyParser.json());
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+// --- CONFIGURA AQUÍ TU PROJECT ID Y ID DEL AGENTE DE DIALOGFLOW ---
+const PROJECT_ID = "pruebahackaton-bfb64"; // <-- Tu Project ID de Firebase
+const SESSION_ID = "flutter_chat_session"; // Puede ser cualquiera
+const LANGUAGE_CODE = "es"; // Español
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+// --- ¡AQUÍ! - INICIALIZACIÓN DEL CLIENTE DE DIALOGFLOW ---
+// Se saca del endpoint para que sea más eficiente y no se cree en cada llamada.
+// Y se usa tu keyFilename para la autenticación.
+const sessionClient = new SessionsClient({
+  projectId: PROJECT_ID,
+  keyFilename: "./service-account.json", // <-- ¡ASEGÚRATE DE INCLUIR ESTE ARCHIVO!
+});
+// -----------------------------------------------------------------
+
+
+// --- ENDPOINT PRINCIPAL DEL CHATBOT ---
+app.post("/api/dialogflow", async (req, res) => {
+  try {
+    const userMessage = req.body.message;
+
+    if (!userMessage) {
+      return res.status(400).json({ error: "Falta el mensaje del usuario" });
+    }
+
+    // --- ¡AQUÍ! ---
+    // Se elimina la inicialización de "sessionClient" de este lugar.
+    // Ya lo creamos arriba y lo estamos reutilizando.
+
+    const sessionPath = sessionClient.projectAgentSessionPath(
+      PROJECT_ID,
+      SESSION_ID
+    );
+
+    // Enviar texto a Dialogflow
+    const request = {
+      session: sessionPath,
+      queryInput: {
+        text: {
+          text: userMessage,
+          languageCode: LANGUAGE_CODE,
+        },
+      },
+    };
+
+    const responses = await sessionClient.detectIntent(request);
+    const result = responses[0].queryResult;
+
+    // Devolver respuesta del bot
+    res.json({
+      query: result.queryText,
+      response: result.fulfillmentText,
+    });
+  } catch (error) {
+    console.error("Error al conectar con Dialogflow:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+// --- EXPORTAR FUNCIÓN PARA FIREBASE ---
+exports.api = functions.https.onRequest(app);

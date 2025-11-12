@@ -12,3 +12,6 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Ignorar llaves secretas de Firebase/Google
+functions/service-account.json
