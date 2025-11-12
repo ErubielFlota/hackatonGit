@@ -66,7 +66,7 @@ class DialogflowService {
     final String sessionPath =
         'projects/$_projectId/locations/$_locationId/agents/$_agentId/sessions/$_sessionId';
 
-  final String regionalEndpoint = 'https://${_locationId}-dialogflow.googleapis.com/';
+  final String regionalEndpoint = 'https://$_locationId-dialogflow.googleapis.com/';
   final api = cx.DialogflowApi(_httpClient, rootUrl: regionalEndpoint);
 
     final request = cx.GoogleCloudDialogflowCxV3DetectIntentRequest.fromJson({
