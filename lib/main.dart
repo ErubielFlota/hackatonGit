@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:prueba2app/bienvenida.dart';
 import 'package:prueba2app/firebase_options.dart';
 import 'package:prueba2app/theme/colors.dart'; 
 import 'auth_checker.dart'; // ¡Importamos el comprobador de estado!

@@ -261,7 +261,7 @@ class _FormularioQuejasSugerenciasPageState
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   hint: const Text('Selecciona un programa'),
-                  value: programaSeleccionado,
+                  initialValue: programaSeleccionado,
                   items: programas
                       .map((programa) =>
                           DropdownMenuItem(value: programa, child: Text(programa)))
