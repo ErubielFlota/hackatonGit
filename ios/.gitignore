@@ -32,3 +32,6 @@ Runner/GeneratedPluginRegistrant.*
 !default.mode2v3
 !default.pbxuser
 !default.perspectivev3
+
+# Claves secretas
+assets/pruebahackaton-bfb64-cb3dbd690d75.json
