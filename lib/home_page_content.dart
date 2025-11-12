@@ -1,6 +1,9 @@
+
+import 'package:url_launcher/url_launcher.dart'; 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:prueba2app/theme/colors.dart';
+import 'package:prueba2app/theme/colors.dart'; 
+
 
 class Programa {
   final String id;
@@ -12,6 +15,18 @@ class Programa {
   final String localidad;
   final String categoria;
 
+  final String objetivo;
+  final String dependencia;
+  final String poblacionObjetivo;
+  final List<String> requisitos;
+  final List<String> pasosRegistro;
+  final List<String> documentacionNecesaria;
+  final String zonaAplicacion;
+  final String telefonoContacto;
+  final String correoContacto;
+  final String imagenReferencia;
+  final String enlaceOficial;
+
   Programa({
     required this.id,
     required this.nombre,
@@ -21,6 +36,17 @@ class Programa {
     required this.fin,
     required this.localidad,
     required this.categoria,
+    required this.objetivo,
+    required this.dependencia,
+    required this.poblacionObjetivo,
+    required this.requisitos,
+    required this.pasosRegistro,
+    required this.documentacionNecesaria,
+    required this.zonaAplicacion,
+    required this.telefonoContacto,
+    required this.correoContacto,
+    required this.imagenReferencia,
+    required this.enlaceOficial,
   });
 
   factory Programa.fromFirestore(DocumentSnapshot doc) {
@@ -32,6 +58,7 @@ class Programa {
     final finTimestamp = data['fin'] as Timestamp?;
 
     return Programa(
+      // --- Campos existentes ---
       id: doc.id,
       nombre: data['titulo'] ?? 'Programa sin nombre',
       descripcion: data['descripcion'] ?? 'Sin descripción.',
@@ -42,6 +69,20 @@ class Programa {
           DateTime.now().add(const Duration(days: 365)),
       localidad: data['localidad'] ?? 'Todas las localidades',
       categoria: data['categoria'] ?? 'Sin Categoría',
+
+      // --- Campos nuevos leídos desde Firebase ---
+      objetivo: data['objetivo'] ?? 'Sin objetivo',
+      dependencia: data['dependencia'] ?? 'No especificada',
+      poblacionObjetivo: data['poblacionObjetivo'] ?? 'Población general',
+      requisitos: List<String>.from(data['requisitos'] ?? []),
+      pasosRegistro: List<String>.from(data['pasosRegistro'] ?? []),
+      documentacionNecesaria:
+          List<String>.from(data['documentacionNecesaria'] ?? []),
+      zonaAplicacion: data['zonaAplicacion'] ?? 'No especificada',
+      telefonoContacto: data['telefonoContacto'] ?? 'No disponible',
+      correoContacto: data['correoContacto'] ?? 'No disponible',
+      imagenReferencia: data['imagenReferencia'] ?? '',
+      enlaceOficial: data['enlaceOficial'] ?? '',
     );
   }
 
@@ -53,9 +94,149 @@ class Programa {
   }
 }
 
+
 class ProgramaDetailPage extends StatelessWidget {
   final Programa programa;
   const ProgramaDetailPage({super.key, required this.programa});
+
+
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      debugPrint('No se pudo lanzar $urlString');
+    }
+  }
+
+ 
+  Widget _buildListSection(
+    BuildContext context, {
+    required String title,
+    required List<String> items,
+    required IconData icon,
+  }) {
+    if (items.isEmpty) return const SizedBox.shrink();
+
+    final colors = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        
+        ...items.map((item) => Padding(
+              padding: const EdgeInsets.only(bottom: 10.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(icon, size: 20, color: colors.secondary),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: textTheme.bodyMedium
+                          ?.copyWith(color: colors.onSurface),
+                    ),
+                  ),
+                ],
+              ),
+            )),
+        const Divider(height: 20, thickness: 0.5),
+      ],
+    );
+  }
+
+  
+  Widget _buildInfoTile(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    VoidCallback? onTap,
+  }) {
+    
+    if (subtitle.isEmpty ||
+        subtitle == 'No disponible' ||
+        subtitle == 'No especificada' ||
+        subtitle == 'Sin objetivo' ||
+        subtitle == 'Población general') {
+      return const SizedBox.shrink();
+    }
+
+    final colors = Theme.of(context).colorScheme;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: colors.primary),
+      title: Text(
+        title,
+        style: TextStyle(fontWeight: FontWeight.bold, color: colors.onSurface),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(color: colors.onSurface, fontSize: 16),
+      ),
+      onTap: onTap,
+      trailing: onTap != null
+          ? Icon(Icons.open_in_new_rounded,
+              size: 18, color: colors.outline)
+          : null,
+    );
+  }
+
+  
+  Widget _buildExpansionCard(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+
+    // Filtra los widgets "vacíos" (SizedBox.shrink)
+    final validChildren = children
+        .where((child) => !(child is SizedBox && child.height == 0.0))
+        .toList();
+
+    // Si no hay NINGÚN widget con contenido, no muestra la tarjeta
+    if (validChildren.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Si hay contenido, crea la tarjeta expandible
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        
+        leading: Icon(icon, color: colors.primary),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: colors.onSurface,
+            fontSize: 17,
+          ),
+        ),
+        backgroundColor: colors.surfaceContainerLowest.withOpacity(0.5),
+        iconColor: colors.primary, 
+        collapsedIconColor: colors.onSurfaceVariant, 
+
+       
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              
+              children: validChildren,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +252,10 @@ class ProgramaDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            
+            // INFORMACIÓN ESTÁTICA (VISIBLE) La parte de arriba de la info de programas
+            
+
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Image.network(
@@ -92,7 +277,6 @@ class ProgramaDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Estado del programa
             Align(
               alignment: Alignment.centerLeft,
               child: Container(
@@ -141,26 +325,146 @@ class ProgramaDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.location_on, color: colors.primary),
-              title: Text('Localidad',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: colors.onSurface)),
-              subtitle: Text(programa.localidad,
-                  style: TextStyle(color: colors.onSurface)),
+            // Localidad y Categoría fijos
+            _buildInfoTile(
+              context,
+              title: 'Localidad',
+              subtitle: programa.localidad,
+              icon: Icons.location_on,
             ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.label, color: colors.primary),
-              title: Text('Categoría',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: colors.onSurface)),
-              subtitle: Text(programa.categoria,
-                  style: TextStyle(color: colors.onSurface)),
+            _buildInfoTile(
+              context,
+              title: 'Categoría',
+              subtitle: programa.categoria,
+              icon: Icons.label,
             ),
 
-            const SizedBox(height: 10),
+            const Divider(height: 30, thickness: 1),
+
+            
+            //  INFORMACIÓN EXPANDIBLE
+           
+
+            // Información Adicional ---
+            _buildExpansionCard(
+              context,
+              title: 'Información Adicional',
+              icon: Icons.info_outline,
+              children: [
+                _buildInfoTile(
+                  context,
+                  title: 'Objetivo',
+                  subtitle: programa.objetivo,
+                  icon: Icons.track_changes,
+                ),
+                _buildInfoTile(
+                  context,
+                  title: 'Dependencia',
+                  subtitle: programa.dependencia,
+                  icon: Icons.account_balance,
+                ),
+                _buildInfoTile(
+                  context,
+                  title: 'Población Objetivo',
+                  subtitle: programa.poblacionObjetivo,
+                  icon: Icons.group,
+                ),
+                _buildInfoTile(
+                  context,
+                  title: 'Zona de Aplicación',
+                  subtitle: programa.zonaAplicacion,
+                  icon: Icons.public,
+                ),
+              ],
+            ),
+
+            // Proceso de Registro ---
+            _buildExpansionCard(
+              context,
+              title: 'Información de registro',
+              icon: Icons.how_to_reg_outlined,
+              children: [
+                _buildListSection(
+                  context,
+                  title: 'Requisitos', // El título ahora se usa internamente
+                  items: programa.requisitos,
+                  icon: Icons.check_box_outline_blank_rounded,
+                ),
+                _buildListSection(
+                  context,
+                  title: 'Pasos de Registro',
+                  items: programa.pasosRegistro,
+                  icon: Icons.format_list_numbered_rounded,
+                ),
+                _buildListSection(
+                  context,
+                  title: 'Documentación Necesaria',
+                  items: programa.documentacionNecesaria,
+                  icon: Icons.description_outlined,
+                ),
+              ],
+            ),
+
+            //  Contacto y Enlaces ---
+            _buildExpansionCard(
+              context,
+              title: 'Contacto y Enlaces',
+              icon: Icons.contact_page_outlined,
+              children: [
+                _buildInfoTile(
+                  context,
+                  title: 'Teléfono de Contacto',
+                  subtitle: programa.telefonoContacto,
+                  icon: Icons.phone_outlined,
+                  onTap: () => _launchUrl('tel:${programa.telefonoContacto}'),
+                ),
+                _buildInfoTile(
+                  context,
+                  title: 'Correo de Contacto',
+                  subtitle: programa.correoContacto,
+                  icon: Icons.email_outlined,
+                  onTap: () => _launchUrl('mailto:${programa.correoContacto}'),
+                ),
+                _buildInfoTile(
+                  context,
+                  title: 'Enlace Oficial',
+                  subtitle: programa.enlaceOficial,
+                  icon: Icons.link_rounded,
+                  onTap: () => _launchUrl(programa.enlaceOficial),
+                ),
+              ],
+            ),
+
+            // ---  Imagen de Referencia ---
+            // 
+            _buildExpansionCard(
+              context,
+              title: 'Imagen de Referencia',
+              icon: Icons.image_outlined,
+              children: [
+                
+                if (programa.imagenReferencia.isNotEmpty)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.network(
+                      programa.imagenReferencia,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: double.infinity,
+                        height: 150,
+                        color: colors.surfaceContainerHighest,
+                        child: Icon(Icons.image_not_supported,
+                            color: colors.onSurfaceVariant),
+                      ),
+                    ),
+                  )
+                else
+                  const SizedBox.shrink(),
+              ],
+            ),
+
+            const SizedBox(height: 30),
             Text('Inicia: ${programa.inicio.toString().split(' ')[0]}',
                 style: TextStyle(color: colors.outline)),
             Text('Finaliza: ${programa.fin.toString().split(' ')[0]}',
@@ -171,6 +475,7 @@ class ProgramaDetailPage extends StatelessWidget {
     );
   }
 }
+
 
 const List<String> _localidadesDisponibles = [
   'Todas las Localidades',
@@ -218,21 +523,21 @@ class _PrincipalPageState extends State<PrincipalPage> {
                   'Programas disponibles',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: primaryColor.darker,
+                        color: primaryColor
+                            .darker, // Asumo que primaryColor está en tu theme
                       ),
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Barra de búsqueda
               TextField(
                 decoration: InputDecoration(
                   hintText: 'Busque un programa en específico',
                   prefixIcon: Icon(Icons.search, color: colors.primary),
                   filled: true,
-                  fillColor: primaryColor.lighter.withOpacity(0.3),
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 12, horizontal: 16),
+                  fillColor: primaryColor.lighter
+                      .withOpacity(0.3), // Asumo que primaryColor está en tu theme
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: BorderSide.none,
@@ -243,8 +548,6 @@ class _PrincipalPageState extends State<PrincipalPage> {
                 },
               ),
               const SizedBox(height: 16),
-
-              // Selector de Localidad
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -276,8 +579,6 @@ class _PrincipalPageState extends State<PrincipalPage> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Lista de programas
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: _programasCollection.snapshots(),
@@ -285,18 +586,15 @@ class _PrincipalPageState extends State<PrincipalPage> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
-
                     if (snapshot.hasError) {
                       return Center(
                         child: Text('Error: ${snapshot.error}',
                             style: TextStyle(color: colors.error)),
                       );
                     }
-
                     final allPrograms = snapshot.data!.docs
                         .map((doc) => Programa.fromFirestore(doc))
                         .toList();
-
                     final programasFiltrados = allPrograms.where((p) {
                       final filtroNombre =
                           p.nombre.toLowerCase().contains(filtro.toLowerCase());
@@ -306,7 +604,6 @@ class _PrincipalPageState extends State<PrincipalPage> {
                               : p.localidad == _localidadSeleccionada;
                       return filtroNombre && filtroLocalidad;
                     }).toList();
-
                     if (programasFiltrados.isEmpty) {
                       return Center(
                         child: Text(
@@ -315,7 +612,6 @@ class _PrincipalPageState extends State<PrincipalPage> {
                         ),
                       );
                     }
-
                     return AnimatedSwitcher(
                       duration: const Duration(milliseconds: 400),
                       key: ValueKey(filtro + _localidadSeleccionada),
@@ -349,6 +645,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
   }
 }
 
+
 class ProgramaCard extends StatelessWidget {
   final Programa programa;
   const ProgramaCard({super.key, required this.programa});
@@ -358,12 +655,11 @@ class ProgramaCard extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final estado = programa.estadoActual();
 
-        final colorEstado = switch (estado) {
+    final colorEstado = switch (estado) {
       'Activo' => colors.primary,
-      'Próximamente' => colors.secondary, 
-      _=> colors.error,
+      'Próximamente' => colors.secondary,
+      _ => colors.error,
     };
-
 
     return Card(
       elevation: 2,
@@ -409,7 +705,8 @@ class ProgramaCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           programa.localidad,
-                          style: TextStyle(fontSize: 13, color: colors.onSurface),
+                          style:
+                              TextStyle(fontSize: 13, color: colors.onSurface),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -423,7 +720,8 @@ class ProgramaCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           programa.categoria,
-                          style: TextStyle(fontSize: 13, color: colors.onSurface),
+                          style:
+                              TextStyle(fontSize: 13, color: colors.onSurface),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -436,8 +734,8 @@ class ProgramaCard extends StatelessWidget {
                       border: Border.all(color: colorEstado),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
                     child: Text(
                       estado,
                       style: TextStyle(
@@ -458,6 +756,3 @@ class ProgramaCard extends StatelessWidget {
     );
   }
 }
-
-
-
