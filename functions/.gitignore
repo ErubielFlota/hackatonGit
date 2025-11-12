@@ -1,5 +1,5 @@
 node_modules/
 *.local
 
-# Ignorar llaves secretas de Firebase/Google
-functions/service-account.json
+# Claves secretas
+assets/pruebahackaton-bfb64-cb3dbd690d75.json

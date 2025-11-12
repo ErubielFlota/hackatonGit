@@ -10,7 +10,7 @@ class DialogflowService {
   final String _locationId = 'us-central1';
   final String _agentId = '1d0a0cfd-ae1b-4fec-847b-23f8fddf6241';
   final String _credentialsFile =
-      'assets/pruebahackaton-bfb64-92d5aa053963.json';
+      'assets/pruebahackaton-bfb64-cb3dbd690d75.json';
 
   late auth.AutoRefreshingAuthClient _httpClient;
   late String _projectId;
