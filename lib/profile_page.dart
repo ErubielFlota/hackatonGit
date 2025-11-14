@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'; 
 import 'autentificacion.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -10,18 +12,34 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  bool hasNewNotification = true; //True si hay notificación nueva
+  bool hasNewNotification = true;
 
-  //aqui es donde esta el texto de las notificaciones flota erubiel 
   List<String> notifications = [
     "hola canche.",
     "santi tamay.",
-    
   ];
+
+  
+  //Foto de perfil
+
+  File? profileImage;
+
+  Future<void> pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      setState(() {
+        profileImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  // Notificaciones
 
   void showNotificationsDialog(BuildContext context) async {
     setState(() {
-      hasNewNotification = false; //se marcan como leídas
+      hasNewNotification = false;
     });
 
     showDialog(
@@ -44,7 +62,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     itemCount: notifications.length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        leading: const Icon(Icons.circle_notifications_outlined),
+                        leading:
+                            const Icon(Icons.circle_notifications_outlined),
                         title: Text(notifications[index]),
                       );
                     },
@@ -72,7 +91,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      // Código para usuario no autenticado
       return Scaffold(
         appBar: AppBar(
           title: const Text('Mi perfil'),
@@ -127,7 +145,6 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: const Text('Mi perfil'),
         actions: [
-          //Icono de campanita con badge rojo
           Padding(
             padding: const EdgeInsets.only(right: 10),
             child: Stack(
@@ -175,10 +192,158 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-      body: Center(
-        child: Text(
-          'Bienvenido, ${user.email ?? 'Usuario'}',
-          style: const TextStyle(fontSize: 18),
+
+      
+      //Cuerpo del perfil
+      
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+
+            //Foto de perfil
+            CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.blueAccent,
+              child: CircleAvatar(
+                radius: 55,
+                backgroundImage: profileImage == null
+                    ? const AssetImage('assets/profile_default.png')
+                    : FileImage(profileImage!) as ImageProvider,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            TextButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  builder: (context) {
+                    return Wrap(
+                      children: [
+                        const SizedBox(height: 10),
+                        const Center(
+                          child: Text(
+                            'Seleccionar imagen',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: const Icon(Icons.photo_library),
+                          title: const Text('Elegir de galería'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            pickImage(ImageSource.gallery);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.camera_alt),
+                          title: const Text('Tomar foto'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            pickImage(ImageSource.camera);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: const Text(
+                "Cambiar foto",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.blueAccent,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              'Bienvenido, ${user.email ?? 'Usuario'}',
+              style: const TextStyle(
+                fontSize: 22,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 35),
+
+            TextField(
+              decoration: InputDecoration(
+                labelText: "Nombre",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            TextField(
+              decoration: InputDecoration(
+                labelText: "Apellido",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            TextField(
+              decoration: InputDecoration(
+                labelText: "CURP",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("Datos guardados (ejemplo)")),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  backgroundColor: Colors.blueAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Guardar",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 50),
+
+            const Text(
+              'Programas favoritos o guardados',
+              style: TextStyle(
+                fontSize: 20,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
