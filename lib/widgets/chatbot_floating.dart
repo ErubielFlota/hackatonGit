@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:prueba2app/pages/chat_panel.dart'; 
+import 'package:prueba2app/pages/chat_panel.dart';
+import 'package:prueba2app/theme/colors.dart'; 
 
 class ChatbotFloating extends StatefulWidget {
   const ChatbotFloating({super.key});
@@ -25,9 +26,9 @@ class _ChatbotFloatingState extends State<ChatbotFloating> {
               }),
             )
           : FloatingActionButton(
-              backgroundColor: Colors.purple,
+              backgroundColor:primaryColor.darker,
               onPressed: () => setState(() => _isOpen = true),
-              child: const Icon(Icons.chat, color: Colors.white),
+              child: Icon(Icons.chat, color: primaryColor.lighter),
             ),
     );
   }
