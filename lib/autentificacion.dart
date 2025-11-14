@@ -109,7 +109,7 @@ class AuthPageState extends State<Autentificacion> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                "Al no registrarse no podrá tener los siguientes beneficios de la aplicación:",
+                "Si decides no registrarte.",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 textAlign: TextAlign.center,
               ),
@@ -119,9 +119,8 @@ class AuthPageState extends State<Autentificacion> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("* Notificaciones en su correo de programas disponibles."),
-                    Text("* Acceder al apartado de quejas y sugerencias."),
-                    Text("* Interactuar con el asistente Chatbot."),
+                    Text("No tendrás acceso a las notificaciones de programas disponibles, al apartado de quejas y sugerencias, ni a la interacción con el asistente Chatbot."),
+                    
                   ],
                 ),
               ),
@@ -132,7 +131,7 @@ class AuthPageState extends State<Autentificacion> {
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: primaryColor.darker,
                       minimumSize: const Size(100, 40),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -150,7 +149,7 @@ class AuthPageState extends State<Autentificacion> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: primaryColor,
                       minimumSize: const Size(100, 40),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
