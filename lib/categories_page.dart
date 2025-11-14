@@ -11,6 +11,26 @@ class CategoriesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
+    // Número de columnas según tamaño de pantalla
+    int crossAxisCount;
+    double childAspectRatio = 1;
+
+    if (width >= 1200) {
+      crossAxisCount = 4; // Monitores grandes
+      childAspectRatio = 1.4;
+    } else if (width >= 900) {
+      crossAxisCount = 3; // Pantallas de laptop
+      childAspectRatio = 1.3;
+    } else if (width >= 600) {
+      crossAxisCount = 2; // Tablets o ventanas medianas
+      childAspectRatio = 1.1;
+    } else {
+      crossAxisCount = 2; // Móviles
+      childAspectRatio = 0.90;
+    }
+
     final List<Map<String, dynamic>> categories = [
       {
         'title': 'Mujeres',
@@ -41,90 +61,81 @@ class CategoriesPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 10),
-              Text(
-                'Categorías de Programas',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: textColor,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 25),
-              Expanded(
-                child: GridView.builder(
-                  itemCount: categories.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                    childAspectRatio: 1,
-                  ),
-                  itemBuilder: (context, index) {
-                    final category = categories[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => category['page']),
-                        );
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: primaryColor.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color: primaryColor.darker.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(2, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              category['icon'],
-                              size: 55,
-                              color: primaryColor.darker,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              category['title'],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                                color: textColor,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Container(
-                              width: 30,
-                              height: 3,
-                              decoration: BoxDecoration(
-                                color: primaryColor.darker,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+      appBar: AppBar(
+        title: const Text(
+          'Categorías de Programas',
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
           ),
+        ),
+        backgroundColor: backgroundColor,
+        centerTitle: true,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: GridView.builder(
+          itemCount: categories.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 20,
+            mainAxisSpacing: 20,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemBuilder: (context, index) {
+            final category = categories[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => category['page']),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.darker.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(2, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      category['icon'],
+                      size: 60,
+                      color: primaryColor.darker,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      category['title'],
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: primaryColor.darker,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

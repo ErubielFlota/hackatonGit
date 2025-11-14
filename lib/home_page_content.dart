@@ -1,9 +1,7 @@
-
-import 'package:url_launcher/url_launcher.dart'; 
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:prueba2app/theme/colors.dart'; 
-
+import 'package:prueba2app/theme/colors.dart';
 
 class Programa {
   final String id;
@@ -94,11 +92,9 @@ class Programa {
   }
 }
 
-
 class ProgramaDetailPage extends StatelessWidget {
   final Programa programa;
   const ProgramaDetailPage({super.key, required this.programa});
-
 
   Future<void> _launchUrl(String urlString) async {
     final Uri url = Uri.parse(urlString);
@@ -107,7 +103,6 @@ class ProgramaDetailPage extends StatelessWidget {
     }
   }
 
- 
   Widget _buildListSection(
     BuildContext context, {
     required String title,
@@ -122,7 +117,6 @@ class ProgramaDetailPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        
         ...items.map((item) => Padding(
               padding: const EdgeInsets.only(bottom: 10.0),
               child: Row(
@@ -145,7 +139,6 @@ class ProgramaDetailPage extends StatelessWidget {
     );
   }
 
-  
   Widget _buildInfoTile(
     BuildContext context, {
     required String title,
@@ -153,7 +146,6 @@ class ProgramaDetailPage extends StatelessWidget {
     required IconData icon,
     VoidCallback? onTap,
   }) {
-    
     if (subtitle.isEmpty ||
         subtitle == 'No disponible' ||
         subtitle == 'No especificada' ||
@@ -176,13 +168,11 @@ class ProgramaDetailPage extends StatelessWidget {
       ),
       onTap: onTap,
       trailing: onTap != null
-          ? Icon(Icons.open_in_new_rounded,
-              size: 18, color: colors.outline)
+          ? Icon(Icons.open_in_new_rounded, size: 18, color: colors.outline)
           : null,
     );
   }
 
-  
   Widget _buildExpansionCard(
     BuildContext context, {
     required String title,
@@ -208,7 +198,6 @@ class ProgramaDetailPage extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
-        
         leading: Icon(icon, color: colors.primary),
         title: Text(
           title,
@@ -219,16 +208,13 @@ class ProgramaDetailPage extends StatelessWidget {
           ),
         ),
         backgroundColor: colors.surfaceContainerLowest.withOpacity(0.5),
-        iconColor: colors.primary, 
-        collapsedIconColor: colors.onSurfaceVariant, 
-
-       
+        iconColor: colors.primary,
+        collapsedIconColor: colors.onSurfaceVariant,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              
               children: validChildren,
             ),
           ),
@@ -236,11 +222,12 @@ class ProgramaDetailPage extends StatelessWidget {
       ),
     );
   }
-  
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final size = MediaQuery.of(context).size;
+    final isWide=size.width>600;
 
     return Scaffold(
       appBar: AppBar(
@@ -248,24 +235,22 @@ class ProgramaDetailPage extends StatelessWidget {
         backgroundColor: colors.primary,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(isWide ? 32:16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
             // INFORMACIÓN ESTÁTICA (VISIBLE) La parte de arriba de la info de programas
-            
 
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Image.network(
                 programa.imagenUrl,
                 width: double.infinity,
-                height: 200,
+                height: isWide ? 300 : 200,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    height: 200,
+                    height: isWide ? 300 : 200,
                     color: colors.surfaceContainerHighest,
                     child: Center(
                       child: Icon(Icons.error,
@@ -341,9 +326,7 @@ class ProgramaDetailPage extends StatelessWidget {
 
             const Divider(height: 30, thickness: 1),
 
-            
             //  INFORMACIÓN EXPANDIBLE
-           
 
             // Información Adicional ---
             _buildExpansionCard(
@@ -436,13 +419,12 @@ class ProgramaDetailPage extends StatelessWidget {
             ),
 
             // ---  Imagen de Referencia ---
-            // 
+            //
             _buildExpansionCard(
               context,
               title: 'Imagen de Referencia',
               icon: Icons.image_outlined,
               children: [
-                
                 if (programa.imagenReferencia.isNotEmpty)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
@@ -475,7 +457,6 @@ class ProgramaDetailPage extends StatelessWidget {
     );
   }
 }
-
 
 const List<String> _localidadesDisponibles = [
   'Todas las Localidades',
@@ -534,8 +515,8 @@ class _PrincipalPageState extends State<PrincipalPage> {
                   hintText: 'Busque un programa en específico',
                   prefixIcon: Icon(Icons.search, color: colors.primary),
                   filled: true,
-                  fillColor: primaryColor.lighter
-                      .withOpacity(0.3), // Asumo que primaryColor está en tu theme
+                  fillColor: primaryColor.lighter.withOpacity(
+                      0.3), // Asumo que primaryColor está en tu theme
                   contentPadding:
                       const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   border: OutlineInputBorder(
@@ -560,8 +541,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
                   child: DropdownButton<String>(
                     isExpanded: true,
                     value: _localidadSeleccionada,
-                    icon:
-                        Icon(Icons.arrow_drop_down, color: colors.onSurface),
+                    icon: Icon(Icons.arrow_drop_down, color: colors.onSurface),
                     style: TextStyle(color: colors.onSurface, fontSize: 16),
                     onChanged: (String? newValue) {
                       setState(() {
@@ -598,10 +578,10 @@ class _PrincipalPageState extends State<PrincipalPage> {
                     final programasFiltrados = allPrograms.where((p) {
                       final filtroNombre =
                           p.nombre.toLowerCase().contains(filtro.toLowerCase());
-                      final filtroLocalidad =
-                          _localidadSeleccionada == _localidadesDisponibles.first
-                              ? true
-                              : p.localidad == _localidadSeleccionada;
+                      final filtroLocalidad = _localidadSeleccionada ==
+                              _localidadesDisponibles.first
+                          ? true
+                          : p.localidad == _localidadSeleccionada;
                       return filtroNombre && filtroLocalidad;
                     }).toList();
                     if (programasFiltrados.isEmpty) {
@@ -644,7 +624,6 @@ class _PrincipalPageState extends State<PrincipalPage> {
     );
   }
 }
-
 
 class ProgramaCard extends StatelessWidget {
   final Programa programa;
@@ -734,8 +713,8 @@ class ProgramaCard extends StatelessWidget {
                       border: Border.all(color: colorEstado),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     child: Text(
                       estado,
                       style: TextStyle(
