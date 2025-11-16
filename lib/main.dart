@@ -4,15 +4,23 @@ import 'package:prueba2app/firebase_options.dart';
 import 'package:prueba2app/theme/colors.dart'; 
 import 'auth_checker.dart'; // ¡Importamos el comprobador de estado!
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  if (Firebase.apps.isEmpty) {
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } catch (_) {}
+  }
+
   runApp(const MyApp());
 }
 
+
 class MyApp extends StatelessWidget {
+  // ... (El resto de tu código 'MyApp' no necesita cambios)
   const MyApp({super.key});
 
   @override
@@ -29,8 +37,6 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      // CAMBIO CLAVE: Usamos el AuthChecker como pantalla inicial.
-      // El AuthChecker decidirá entre HomePage y Autentificacion (Login).
       home: const AuthChecker(),
     );
   }
