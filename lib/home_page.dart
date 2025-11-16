@@ -6,7 +6,7 @@ import '/categories_page.dart';
 import 'formulario_quejas_sugerencias.dart';
 import '../theme/colors.dart';
 
-// 👇 Importa el chatbot
+//  Importacion del chatbot
 import 'widgets/chatbot_floating.dart';
 
 class HomePage extends StatefulWidget {
