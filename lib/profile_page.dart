@@ -14,7 +14,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   // ----------------------------------------------------------
-  // NOTIFICACIONES
+  // NOTIFICACIONES (Sin cambios)
   // ----------------------------------------------------------
   List<String> notifications = ["hola canche.", "santi tamay."];
   int unreadNotifications = 2;
@@ -80,17 +80,19 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       final doc = await FirebaseFirestore.instance
-          .collection("usuarios")
+          // <-- CAMBIO: Usamos la colección correcta
+          .collection("usuarios_registrados") 
           .doc(user.uid)
           .get();
 
       if (doc.exists) {
         final data = doc.data()!;
 
-        _nombre.text = data["nombre"] ?? "";
-        _apellido.text = data["apellido"] ?? "";
-        _curp.text = data["curp"] ?? "";
-        profileImageUrl = data["fotoUrl"];
+        // <-- CAMBIO: Usamos los nombres de campo correctos
+        _nombre.text = data["nombres"] ?? "";
+        _apellido.text = data["apellidos"] ?? "";
+        _curp.text = data["curp"] ?? ""; // Este campo es de profile
+        profileImageUrl = data["fotoUrl"]; // Este campo es de profile
       }
 
       setState(() {});
@@ -142,13 +144,15 @@ class _ProfilePageState extends State<ProfilePage> {
       final photoUrl = await _uploadProfileImage(user.uid);
 
       await FirebaseFirestore.instance
-          .collection("usuarios")
+          // <-- CAMBIO: Usamos la colección correcta
+          .collection("usuarios_registrados")
           .doc(user.uid)
           .set({
-        "nombre": _nombre.text.trim(),
-        "apellido": _apellido.text.trim(),
+        // <-- CAMBIO: Usamos los nombres de campo correctos
+        "nombres": _nombre.text.trim(),
+        "apellidos": _apellido.text.trim(),
         "curp": curp,
-        "email": user.email,
+        "correo": user.email, // <-- CAMBIO: "correo" para ser consistente
         "fotoUrl": photoUrl,
       }, SetOptions(merge: true));
 
@@ -208,19 +212,27 @@ class _ProfilePageState extends State<ProfilePage> {
       final cred = EmailAuthProvider.credential(email: user.email!, password: password);
       await user.reauthenticateWithCredential(cred);
 
+      // Esto actualiza Firebase AUTH (el login)
       await user.verifyBeforeUpdateEmail(newEmail);
 
+      // Esto actualiza tu base de datos Firestore
       await FirebaseFirestore.instance
-          .collection("usuarios")
+          // <-- CAMBIO: Usamos la colección correcta
+          .collection("usuarios_registrados")
           .doc(user.uid)
-          .set({"email": newEmail}, SetOptions(merge: true));
+          // <-- CAMBIO: "correo" para ser consistente
+          .set({"correo": newEmail}, SetOptions(merge: true));
 
       Navigator.pop(ctx);
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Se envió un mensaje al nuevo correo"),
+        content: Text("Se envió un mensaje al nuevo correo para verificar"),
         backgroundColor: Colors.green,
       ));
+      
+      // Actualizamos el campo de texto en la UI
+      _email.text = newEmail;
+      
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
@@ -276,7 +288,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // ----------------------------------------------------------
-  // UI
+  // UI (Sin cambios)
   // ----------------------------------------------------------
 
   @override
