@@ -20,6 +20,10 @@ class _FormularioQuejasSugerenciasPageState
   String tipoSeleccionado = 'Queja';
   String? programaSeleccionado;
 
+  // <--- CORRECIÓN 1: Nombre de variable corregido (era _isLonading)
+  //este sirve para ver si esta cargando o no
+  bool _isLoading = false;
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final List<String> programas = [
@@ -45,122 +49,136 @@ class _FormularioQuejasSugerenciasPageState
   ];
 
   Future<void> enviarMensaje() async {
-    final user = FirebaseAuth.instance.currentUser;
+    // <--- CORRECIÓN 2: Lógica de carga implementada con try...finally
+    if (_isLoading) return; //si ya esta cargando, no hacer nada
+    setState(() {
+      _isLoading = true;
+    });
 
-    // 1. Validación de campos
-    if (programaSeleccionado == null || mensajeController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, complete todos los campos.'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
-    }
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: No se encontró el usuario.')),
-      );
-      return;
-    }
-
-    String nombreCompleto = 'Usuario'; // Valor por defecto
-    
     try {
-      final String uid = user.uid;
-      final String correo = user.email ?? 'Desconocido';
+      final user = FirebaseAuth.instance.currentUser;
 
-      // 2. OBTENER EL NOMBRE COMPLETO DESDE FIRESTORE (¡AHORA CORREGIDO!)
+      // 1. Validación de campos
+      if (programaSeleccionado == null ||
+          mensajeController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Por favor, complete todos los campos.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return; // El 'finally' se ejecutará de todos modos
+      }
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: No se encontró el usuario.')),
+        );
+        return; // El 'finally' se ejecutará de todos modos
+      }
+
+      String nombreCompleto = 'Usuario'; // Valor por defecto
+
+      // Este try/catch interno es para el nombre, está bien
       try {
-        // Usamos los nombres correctos
-        const String nombreColeccion = 'usuarios_registrados';
-        const String campoNombre = 'nombres';
-        const String campoApellidos = 'apellidos';
+        final String uid = user.uid;
+        // 2. OBTENER EL NOMBRE COMPLETO DESDE FIRESTORE (¡AHORA CORREGIDO!)
+        try {
+          // Usamos los nombres correctos
+          const String nombreColeccion = 'usuarios_registrados';
+          const String campoNombre = 'nombres';
+          const String campoApellidos = 'apellidos';
 
-        final docSnap = await _firestore.collection(nombreColeccion).doc(uid).get(); 
+          final docSnap =
+              await _firestore.collection(nombreColeccion).doc(uid).get();
 
-        if (docSnap.exists) {
-          final data = docSnap.data() as Map<String, dynamic>;
-          
-          final String nombreFirestore = data[campoNombre] ?? ''; 
-          final String apellidosFirestore = data[campoApellidos] ?? '';
+          if (docSnap.exists) {
+            final data = docSnap.data() as Map<String, dynamic>;
 
-          nombreCompleto = '$nombreFirestore $apellidosFirestore'.trim();
-        } 
-        
-        // Fallback por si acaso
-        if (nombreCompleto.isEmpty) {
-          nombreCompleto = user.displayName ?? 'Usuario';
+            final String nombreFirestore = data[campoNombre] ?? '';
+            final String apellidosFirestore = data[campoApellidos] ?? '';
+
+            nombreCompleto = '$nombreFirestore $apellidosFirestore'.trim();
+          }
+
+          // Fallback por si acaso
+          if (nombreCompleto.isEmpty) {
+            nombreCompleto = user.displayName ?? 'Usuario';
+          }
+        } catch (e) {
+          debugPrint('Error al leer nombre de Firestore: $e');
+          nombreCompleto = user.displayName ?? 'Usuario'; // Usar fallback
         }
 
-      } catch (e) {
-        debugPrint('Error al leer nombre de Firestore: $e');
-        nombreCompleto = user.displayName ?? 'Usuario'; // Usar fallback
-      }
-      
-      // 3. Guardar en Firestore
-      await _firestore.collection('sugerencias_quejas').add({
-        'nombre': nombreCompleto, // <-- Se usa la nueva variable
-        'correo': correo,
-        'uid': uid,
-        'programa': programaSeleccionado,
-        'tipo': tipoSeleccionado,
-        'mensaje': mensajeController.text.trim(),
-        'fecha': Timestamp.now(),
-      });
+        // 3. Guardar en Firestore
+        await _firestore.collection('sugerencias_quejas').add({
+          'nombre': nombreCompleto, // <-- Se usa la nueva variable
+          'correo': user.email ?? 'Desconocido',
+          'uid': uid,
+          'programa': programaSeleccionado,
+          'tipo': tipoSeleccionado,
+          'mensaje': mensajeController.text.trim(),
+          'fecha': Timestamp.now(),
+        });
 
-      // 4. Enviar correo usando EmailJS
-      try {
-        const serviceId = 'service_1ndjsyp';
-        const templateId = 'template_7gxqncc';
-        const publicKey = 'g1sUydGApinepfy8J';
+        // 4. Enviar correo usando EmailJS
+        try {
+          const serviceId = 'service_1ndjsyp';
+          const templateId = 'template_7gxqncc';
+          const publicKey = 'g1sUydGApinepfy8J';
 
-        final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
-        final response = await http.post(
-          url,
-          headers: {
-            'origin': 'http://localhost',
-            'Content-Type': 'application/json',
-          },
-          body: json.encode({
-            'service_id': serviceId,
-            'template_id': templateId,
-            'user_id': publicKey,
-            'template_params': {
-              'to_name': 'Administrador',
-              'from_name': nombreCompleto, // <-- Se usa la nueva variable
-              'message': mensajeController.text.trim(),
-              'reply_to': correo,
-              'programa': programaSeleccionado,
-              'tipo': tipoSeleccionado,
-            }
-          }),
+          final url =
+              Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
+          final response = await http.post(
+            url,
+            headers: {
+              'origin': 'http://localhost',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode({
+              'service_id': serviceId,
+              'template_id': templateId,
+              'user_id': publicKey,
+              'template_params': {
+                'to_name': 'Administrador',
+                'from_name': nombreCompleto, // <-- Se usa la nueva variable
+                'message': mensajeController.text.trim(),
+                'reply_to': user.email ?? 'Desconocido',
+                'programa': programaSeleccionado,
+                'tipo': tipoSeleccionado,
+              }
+            }),
+          );
+
+          if (response.statusCode == 200) {
+            debugPrint('Correo enviado correctamente');
+          } else {
+            debugPrint('Error al enviar correo: ${response.body}');
+          }
+        } catch (emailError) {
+          debugPrint('No se pudo enviar el correo: $emailError');
+        }
+
+        // 5. Mostrar confirmación
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Mensaje enviado correctamente')),
         );
 
-        if (response.statusCode == 200) {
-          debugPrint('Correo enviado correctamente');
-        } else {
-          debugPrint('Error al enviar correo: ${response.body}');
-        }
-      } catch (emailError) {
-        debugPrint('No se pudo enviar el correo: $emailError');
+        mensajeController.clear();
+        setState(() {
+          tipoSeleccionado = 'Queja';
+          programaSeleccionado = null;
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al enviar: $e')),
+        );
       }
-
-      // 5. Mostrar confirmación
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mensaje enviado correctamente')),
-      );
-
-      mensajeController.clear();
+    } finally {
+      // <--- CORRECIÓN 2:
+      // Esto se ejecutará SIEMPRE, no importa si hubo éxito o error.
       setState(() {
-        tipoSeleccionado = 'Queja';
-        programaSeleccionado = null;
+        _isLoading = false;
       });
-
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al enviar: $e')),
-      );
     }
   }
 
@@ -197,19 +215,24 @@ class _FormularioQuejasSugerenciasPageState
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const Autentificacion()),
+                    MaterialPageRoute(
+                        builder: (context) => const Autentificacion()),
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: const Text(
                   'Iniciar sesión',
-                  style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -248,27 +271,32 @@ class _FormularioQuejasSugerenciasPageState
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              // ... (dentro de Column)
               children: [
-                // Mostramos info del usuario actual
+                // ESTO LO AGREGUE COMO COMETARIO PARA QUE NO SE VEA EL "USUARIO:ASDGASGDFGRA@GMAIL.COM"
+                /* <-- AÑADE ESTO 
                 Text(
                   'Usuario: ${user.email}',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const Divider(height: 20, thickness: 1),
+                  <-- Y AÑADE ESTO */
 
-                const Text('Programa del gobierno:',
+                const Text('Programa del gobierno:', // ...
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   hint: const Text('Selecciona un programa'),
                   initialValue: programaSeleccionado,
                   items: programas
-                      .map((programa) =>
-                          DropdownMenuItem(value: programa, child: Text(programa)))
+                      .map((programa) => DropdownMenuItem(
+                          value: programa, child: Text(programa)))
                       .toList(),
-                  onChanged: (value) => setState(() => programaSeleccionado = value),
+                  onChanged: (value) =>
+                      setState(() => programaSeleccionado = value),
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -282,7 +310,8 @@ class _FormularioQuejasSugerenciasPageState
                         value: 'Queja',
                         groupValue: tipoSeleccionado,
                         activeColor: Colors.lightBlueAccent,
-                        onChanged: (value) => setState(() => tipoSeleccionado = value!),
+                        onChanged: (value) =>
+                            setState(() => tipoSeleccionado = value!),
                       ),
                     ),
                     Expanded(
@@ -291,37 +320,51 @@ class _FormularioQuejasSugerenciasPageState
                         value: 'Sugerencia',
                         groupValue: tipoSeleccionado,
                         activeColor: Colors.lightBlueAccent,
-                        onChanged: (value) => setState(() => tipoSeleccionado = value!),
+                        onChanged: (value) =>
+                            setState(() => tipoSeleccionado = value!),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
 
-                const Text('Mensaje:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Mensaje:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 TextField(
                   controller: mensajeController,
                   maxLines: 4,
                   decoration: InputDecoration(
                     hintText: 'Ingrese su mensaje',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
                 const SizedBox(height: 20),
 
                 SizedBox(
                   width: double.infinity,
+                  // <--- CORRECIÓN 3: El botón ahora reacciona a _isLoading
                   child: ElevatedButton(
-                    onPressed: enviarMensaje,
+                    onPressed: _isLoading ? null : enviarMensaje,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[700],
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
                     ),
-                    child: const Text(
-                      'Enviar',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
+                          )
+                        : const Text(
+                            'Enviar',
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
                   ),
                 ),
               ],
