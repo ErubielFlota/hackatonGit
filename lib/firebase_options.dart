@@ -4,16 +4,6 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-/// Default [FirebaseOptions] for use with your Firebase apps.
-///
-/// Example:
-/// ```dart
-/// import 'firebase_options.dart';
-/// // ...
-/// await Firebase.initializeApp(
-///   options: DefaultFirebaseOptions.currentPlatform,
-/// );
-/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -46,7 +36,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1076375118385',
     projectId: 'pruebahackaton-bfb64',
     authDomain: 'pruebahackaton-bfb64.firebaseapp.com',
-    storageBucket: 'pruebahackaton-bfb64.firebasestorage.app',
+    storageBucket: 'pruebahackaton-bfb64.appspot.com',     // ← CORREGIDO
     measurementId: 'G-EPM34J42T3',
   );
 
@@ -55,7 +45,7 @@ class DefaultFirebaseOptions {
     appId: '1:1076375118385:android:57fb4b8a958cc1a2212b10',
     messagingSenderId: '1076375118385',
     projectId: 'pruebahackaton-bfb64',
-    storageBucket: 'pruebahackaton-bfb64.firebasestorage.app',
+    storageBucket: 'pruebahackaton-bfb64.appspot.com',     // ← CORREGIDO
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -63,7 +53,7 @@ class DefaultFirebaseOptions {
     appId: '1:1076375118385:ios:5a6ec5c41770fca2212b10',
     messagingSenderId: '1076375118385',
     projectId: 'pruebahackaton-bfb64',
-    storageBucket: 'pruebahackaton-bfb64.firebasestorage.app',
+    storageBucket: 'pruebahackaton-bfb64.appspot.com',     // ← CORREGIDO
     iosBundleId: 'com.example.prueba2app',
   );
 
@@ -72,7 +62,7 @@ class DefaultFirebaseOptions {
     appId: '1:1076375118385:ios:5a6ec5c41770fca2212b10',
     messagingSenderId: '1076375118385',
     projectId: 'pruebahackaton-bfb64',
-    storageBucket: 'pruebahackaton-bfb64.firebasestorage.app',
+    storageBucket: 'pruebahackaton-bfb64.appspot.com',     // ← CORREGIDO
     iosBundleId: 'com.example.prueba2app',
   );
 
@@ -82,7 +72,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1076375118385',
     projectId: 'pruebahackaton-bfb64',
     authDomain: 'pruebahackaton-bfb64.firebaseapp.com',
-    storageBucket: 'pruebahackaton-bfb64.firebasestorage.app',
+    storageBucket: 'pruebahackaton-bfb64.appspot.com',     // ← CORREGIDO
     measurementId: 'G-RXZXW0JJ9V',
   );
 }
