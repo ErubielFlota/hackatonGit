@@ -10,8 +10,8 @@
 
     <application
         android:name="${applicationName}"
-        android:label="prueba2app"
-        android:icon="@mipmap/ic_launcher">
+        android:label="MiApoyo"
+        android:icon="@mipmap/launcher_icon">
 
         <!-- PROVIDER CORRECTO  -->
         <provider

@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:googleapis/dialogflow/v3.dart' as cx;
@@ -8,7 +7,13 @@ import 'package:uuid/uuid.dart';
 class DialogflowService {
   //Configurar el bot
   final String _locationId = 'us-central1';
-  final String _agentId = '1d0a0cfd-ae1b-4fec-847b-23f8fddf6241';
+
+  // 👇 ¡PON TU ID DE AGENTE AQUÍ! (El que copiaste de la URL del navegador)
+  final String _agentId = '1d0a0cfd-ae1b-4fec-847b-23f8fddf6241'; 
+
+  // 👇 ¡AQUÍ ESTÁ EL ID DE TU ENTORNO "PRODUCCION"!
+  final String _environmentId = 'd78da970-5a2c-4d1d-b62b-1ffd0f2b83cc'; 
+
   final String _credentialsFile =
       'assets/pruebahackaton-bfb64-cb3dbd690d75.json';
 
@@ -46,35 +51,39 @@ class DialogflowService {
       _isInitialized = true;
       print("DialogflowService (CX) inicializado correctamente.");
       print("   Usando Proyecto: $_projectId");
+      print("   Usando Agente: $_agentId");
+      print("   Usando Entorno: $_environmentId");
       print("   Usando Sesión: $_sessionId");
     } catch (e) {
       print("Error al inicializar DialogflowService: $e");
       print("   Asegúrate de que '$_credentialsFile' exista en 'assets/'");
       print(
-          "   y que las variables _locationId y _agentId sean correctas.");
+          "   y que las variables _locationId, _agentId y _environmentId sean correctas.");
       rethrow;
     }
   }
 
   Future<String> sendMessage(String text) async {
+    print("--- INTENTANDO ENVIAR MENSAJE: '$text' ---");
     if (!_isInitialized) {
+    
       throw StateError(
           'DialogflowService no inicializado. Llama a init() antes.');
     }
 
-
+    // 👇 ¡MODIFICADO! Esta ruta ahora apunta a tu entorno "produccion"
     final String sessionPath =
-        'projects/$_projectId/locations/$_locationId/agents/$_agentId/sessions/$_sessionId';
+        'projects/$_projectId/locations/$_locationId/agents/$_agentId/environments/$_environmentId/sessions/$_sessionId';
 
-  final String regionalEndpoint = 'https://$_locationId-dialogflow.googleapis.com/';
-  final api = cx.DialogflowApi(_httpClient, rootUrl: regionalEndpoint);
+    final String regionalEndpoint = 'https://$_locationId-dialogflow.googleapis.com/';
+    final api = cx.DialogflowApi(_httpClient, rootUrl: regionalEndpoint);
 
     final request = cx.GoogleCloudDialogflowCxV3DetectIntentRequest.fromJson({
       'queryInput': {
         'text': {
           'text': text,
         },
-        'languageCode': 'es', 
+        'languageCode': 'es',
       }
     });
 
@@ -86,12 +95,10 @@ class DialogflowService {
 
       if (response.queryResult?.responseMessages != null &&
           response.queryResult!.responseMessages!.isNotEmpty) {
-
         var textMessages = response.queryResult!.responseMessages!
             .where((message) => message.text != null && message.text!.text != null && message.text!.text!.isNotEmpty);
 
         if (textMessages.isNotEmpty) {
-
           return textMessages
               .map((message) => message.text!.text!.join('\n'))
               .join('\n');
@@ -99,10 +106,9 @@ class DialogflowService {
       }
 
       return "No se recibió una respuesta de texto del agente.";
-
     } catch (e) {
       print("Error al llamar a detectIntent: $e");
-      return "Error al contactar al agente: $e";
+      rethrow;
     }
   }
 }

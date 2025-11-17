@@ -13,9 +13,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // ----------------------------------------------------------
-  // NOTIFICACIONES (Sin cambios)
-  // ----------------------------------------------------------
+
   List<String> notifications = ["hola canche.", "santi tamay."];
   int unreadNotifications = 2;
 
@@ -50,9 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // ----------------------------------------------------------
-  // PERFIL
-  // ----------------------------------------------------------
+  
   File? profileImage;
   String? profileImageUrl;
 
