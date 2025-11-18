@@ -367,7 +367,7 @@ class AuthPageState extends State<Autentificacion> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
-                    borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
+                    borderSide: BorderSide(color: primaryColor.darker, width: 2),
                   ),
                 ),
                 keyboardType: TextInputType.emailAddress,

@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:prueba2app/autentificacion.dart';
+import 'package:prueba2app/theme/colors.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -295,12 +296,20 @@ class _ProfilePageState extends State<ProfilePage> {
     if (user == null) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.lightBlueAccent,
-          automaticallyImplyLeading: false,
-          title: const Text("Mi perfil", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          'Mi Perfil',
+          style: TextStyle(
+            color: primaryColor.darker,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        backgroundColor: backgroundColor,
         centerTitle: true,
-        ),
+        elevation: 0,
+      ),
+      backgroundColor: backgroundColor,
+      
+      
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

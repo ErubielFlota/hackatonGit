@@ -62,10 +62,10 @@ class CategoriesPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Categorías de Programas',
           style: TextStyle(
-            color: textColor,
+            color: primaryColor.darker,
             fontWeight: FontWeight.bold,
           ),
         ),

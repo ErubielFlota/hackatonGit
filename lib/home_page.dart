@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
     const ProfilePage(),
   ];
 
-  final Color navBarBackgroundColor = Colors.grey[100]!;
+  final Color navBarBackgroundColor = backgroundColor;
 
   @override
   void initState() {
@@ -54,41 +54,62 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final width = mq.size.width;
+
+    final bool isWide = width > 900;
+
+    final double navIconSize = isWide ? 30 : 22;
+    final double navTextSize = isWide ? 16 : 12;
+    final EdgeInsets navPadding = isWide
+        ? const EdgeInsets.symmetric(vertical: 18, horizontal: 26)
+        : const EdgeInsets.symmetric(vertical: 14, horizontal: 18);
+
     return Scaffold(
       body: Stack(
         children: [
-          // --- Contenido principal (PageView) ---
           PageView(
             controller: _pageController,
             physics: const NeverScrollableScrollPhysics(),
             children: screens,
             onPageChanged: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
+              setState(() => _currentIndex = index);
             },
           ),
 
-          // --- Chatbot flotante ---
+          // Chatbot flotante
           const ChatbotFloating(),
         ],
       ),
 
-      // --- Barra de navegación inferior ---
+      // -----------------------------
+      // 🔻 Barra de navegación responsiva
+      // -----------------------------
       bottomNavigationBar: Container(
         color: primaryColor,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: EdgeInsets.symmetric(
+          horizontal: isWide ? 30 : 10,
+        ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          padding: EdgeInsets.symmetric(
+            vertical: isWide ? 14 : 10,
+          ),
           child: GNav(
             backgroundColor: primaryColor,
             color: Colors.black54,
+            iconSize: navIconSize,
+            textStyle: TextStyle(
+              fontSize: navTextSize,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
             tabBackgroundColor: primaryColor.darker,
             selectedIndex: _currentIndex,
             tabBorderRadius: 50,
-            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+            padding: navPadding,
+            gap: isWide ? 10 : 6,
             onTabChange: _onTabChange,
-            tabs: const [
+            tabs: [
               GButton(
                 icon: Icons.home,
                 text: 'Principal',

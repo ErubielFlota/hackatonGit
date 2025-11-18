@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:prueba2app/home_page_content.dart'; 
+import '../theme/colors.dart';
 
 class AdultosPage extends StatefulWidget { 
   const AdultosPage({super.key});
@@ -21,10 +22,18 @@ class _AdultosPageState extends State<AdultosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text('Programas para Adultos'), 
-        backgroundColor: Colors.teal,
+      backgroundColor: backgroundColor,
+     appBar: AppBar(
+        title: Text(
+          'Adultos Mayores',
+          style: TextStyle(
+            color: primaryColor.darker,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        centerTitle: true,
+        elevation: 0,
       ),
       body: SafeArea(
         child: Padding(
