@@ -1,4 +1,10 @@
-import 'dart:io';
+// profile_page.dart
+// VERSIÓN FINAL "BASE64":
+// Usamos codificación Base64 para evitar bloqueos de transmisión en Web.
+
+import 'dart:convert'; // <--- ¡NUEVO IMPORT NECESARIO!
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -15,7 +21,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-
   List<String> notifications = ["hola canche.", "santi tamay."];
   int unreadNotifications = 2;
 
@@ -50,8 +55,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  
-  File? profileImage;
+  Uint8List? profileImageBytes;
   String? profileImageUrl;
 
   final TextEditingController _nombre = TextEditingController();
@@ -78,44 +82,75 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       final doc = await FirebaseFirestore.instance
-          // <-- CAMBIO: Usamos la colección correcta
-          .collection("usuarios_registrados") 
+          .collection("usuarios_registrados")
           .doc(user.uid)
           .get();
 
       if (doc.exists) {
         final data = doc.data()!;
-
-        // <-- CAMBIO: Usamos los nombres de campo correctos
         _nombre.text = data["nombres"] ?? "";
         _apellido.text = data["apellidos"] ?? "";
-        _curp.text = data["curp"] ?? ""; // Este campo es de profile
-        profileImageUrl = data["fotoUrl"]; // Este campo es de profile
+        _curp.text = data["curp"] ?? "";
+        profileImageUrl = data["fotoUrl"];
       }
 
       setState(() {});
-    } catch (e) {}
-  }
-
-  Future<void> pickImage(ImageSource source) async {
-    final picked = await ImagePicker().pickImage(source: source);
-    if (picked != null) {
-      setState(() => profileImage = File(picked.path));
+    } catch (e) {
+      print("Error loading data: $e");
     }
   }
 
+  Future<void> pickImage(ImageSource source) async {
+    try {
+      final picked = await ImagePicker().pickImage(
+          source: source,
+          maxWidth: 800, // Reduje un poco el tamaño para facilitar la subida
+          maxHeight: 800,
+          imageQuality: 80);
+      if (picked != null) {
+        final bytes = await picked.readAsBytes();
+        setState(() => profileImageBytes = bytes);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+
+  // ---------- FUNCIÓN DE SUBIDA BASE64 (LA SOLUCIÓN) ----------
   Future<String?> _uploadProfileImage(String uid) async {
-    if (profileImage == null) return profileImageUrl;
+    if (profileImageBytes == null) {
+      print("[DEBUG] No hay foto nueva, retornando URL actual.");
+      return profileImageUrl;
+    }
 
     try {
-      final ref = FirebaseStorage.instance
-          .ref()
-          .child("profileImages/$uid.jpeg");
+      final filename = "profileImages/$uid/profile.jpg";
+      final ref = FirebaseStorage.instance.ref().child(filename);
 
-      await ref.putFile(profileImage!);
+      print("[DEBUG] Iniciando subida Base64 a: $filename");
 
-      return await ref.getDownloadURL();
+      // 1. Convertimos los bytes a un String Base64
+      String base64Image = base64Encode(profileImageBytes!);
+
+      // 2. Subimos usando putString (Mucho más estable en Web)
+      final uploadTask = ref.putString(
+        base64Image,
+        format: PutStringFormat.base64,
+        metadata: SettableMetadata(contentType: 'image/jpeg'),
+      );
+
+      // 3. Esperamos (ahora no debería colgarse)
+      final snapshot = await uploadTask;
+      print("[DEBUG] ¡Subida completada!");
+
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      print("[DEBUG] URL obtenida: $downloadUrl");
+      
+      return downloadUrl;
+
     } catch (e) {
+      print("[DEBUG] ERROR CRÍTICO EN UPLOAD: $e");
       return profileImageUrl;
     }
   }
@@ -137,30 +172,39 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     setState(() => _saving = true);
+    print("[DEBUG] Guardando perfil...");
 
     try {
+      // Subimos la foto
       final photoUrl = await _uploadProfileImage(user.uid);
 
+      if (photoUrl == null || photoUrl.isEmpty) {
+        print("[DEBUG] ALERTA: URL es nula, pero seguimos guardando datos.");
+      }
+
+      // Guardamos en Firestore
       await FirebaseFirestore.instance
-          // <-- CAMBIO: Usamos la colección correcta
           .collection("usuarios_registrados")
           .doc(user.uid)
           .set({
-        // <-- CAMBIO: Usamos los nombres de campo correctos
         "nombres": _nombre.text.trim(),
         "apellidos": _apellido.text.trim(),
         "curp": curp,
-        "correo": user.email, // <-- CAMBIO: "correo" para ser consistente
+        "correo": user.email,
         "fotoUrl": photoUrl,
       }, SetOptions(merge: true));
 
-      setState(() => profileImageUrl = photoUrl);
+      setState(() {
+        profileImageUrl = photoUrl;
+        profileImageBytes = null;
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Perfil guardado correctamente"),
+        content: Text("Guardado con éxito"),
         backgroundColor: Colors.green,
       ));
     } catch (e) {
+      print("[DEBUG] ERROR GENERAL: $e");
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Error: $e"),
         backgroundColor: Colors.redAccent,
@@ -171,13 +215,12 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // ----------------------------------------------------------
-  // CAMBIAR CORREO / CONTRASEÑA
+  // DIALOGOS DE CORREO / CONTRASEÑA (Sin cambios)
   // ----------------------------------------------------------
 
   void _changeEmailDialog() {
     final emailCtrl = TextEditingController();
     final passCtrl = TextEditingController();
-
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -185,12 +228,19 @@ class _ProfilePageState extends State<ProfilePage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: emailCtrl, decoration: const InputDecoration(labelText: "Nuevo correo")),
-            TextField(controller: passCtrl, decoration: const InputDecoration(labelText: "Contraseña"), obscureText: true),
+            TextField(
+                controller: emailCtrl,
+                decoration: const InputDecoration(labelText: "Nuevo correo")),
+            TextField(
+                controller: passCtrl,
+                decoration: const InputDecoration(labelText: "Contraseña"),
+                obscureText: true),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancelar")),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Cancelar")),
           ElevatedButton(
             child: const Text("Actualizar"),
             onPressed: () async {
@@ -202,44 +252,33 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Future<void> _changeEmail(String newEmail, String password, BuildContext ctx) async {
+  Future<void> _changeEmail(
+      String newEmail, String password, BuildContext ctx) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-
     try {
-      final cred = EmailAuthProvider.credential(email: user.email!, password: password);
+      final cred = EmailAuthProvider.credential(
+          email: user.email!, password: password);
       await user.reauthenticateWithCredential(cred);
-
-      // Esto actualiza Firebase AUTH (el login)
       await user.verifyBeforeUpdateEmail(newEmail);
-
-      // Esto actualiza tu base de datos Firestore
       await FirebaseFirestore.instance
-          // <-- CAMBIO: Usamos la colección correcta
           .collection("usuarios_registrados")
           .doc(user.uid)
-          // <-- CAMBIO: "correo" para ser consistente
           .set({"correo": newEmail}, SetOptions(merge: true));
-
       Navigator.pop(ctx);
-
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Se envió un mensaje al nuevo correo para verificar"),
-        backgroundColor: Colors.green,
-      ));
-      
-      // Actualizamos el campo de texto en la UI
+          content: Text("Verifica tu nuevo correo"),
+          backgroundColor: Colors.green));
       _email.text = newEmail;
-      
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
   void _changePassDialog() {
     final current = TextEditingController();
     final newPass = TextEditingController();
-
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -247,12 +286,22 @@ class _ProfilePageState extends State<ProfilePage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: current, decoration: const InputDecoration(labelText: "Contraseña actual"), obscureText: true),
-            TextField(controller: newPass, decoration: const InputDecoration(labelText: "Nueva contraseña"), obscureText: true),
+            TextField(
+                controller: current,
+                decoration:
+                    const InputDecoration(labelText: "Contraseña actual"),
+                obscureText: true),
+            TextField(
+                controller: newPass,
+                decoration:
+                    const InputDecoration(labelText: "Nueva contraseña"),
+                obscureText: true),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancelar")),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Cancelar")),
           ElevatedButton(
             child: const Text("Actualizar"),
             onPressed: () async {
@@ -264,30 +313,24 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Future<void> _changePassword(String oldPass, String newPass, BuildContext ctx) async {
+  Future<void> _changePassword(
+      String oldPass, String newPass, BuildContext ctx) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-
     try {
-      final cred = EmailAuthProvider.credential(email: user.email!, password: oldPass);
+      final cred = EmailAuthProvider.credential(
+          email: user.email!, password: oldPass);
       await user.reauthenticateWithCredential(cred);
-
       await user.updatePassword(newPass);
-
       Navigator.pop(ctx);
-
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Contraseña actualizada"),
-        backgroundColor: Colors.green,
-      ));
+          content: Text("Contraseña actualizada"),
+          backgroundColor: Colors.green));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
-
-  // ----------------------------------------------------------
-  // UI (Sin cambios)
-  // ----------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -295,88 +338,21 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(
-        title: Text(
-          'Mi Perfil',
-          style: TextStyle(
-            color: primaryColor.darker,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: backgroundColor,
-        centerTitle: true,
-        elevation: 0,
-      ),
-      backgroundColor: backgroundColor,
-      
-      
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Debes iniciar sesión para ver tu perfil.",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 25),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
+            child: ElevatedButton(
+                onPressed: () => Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const Autentificacion()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Text(
-                  'Iniciar sesión',
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-        ),
+                        builder: (context) => const Autentificacion())),
+                child: const Text("Iniciar Sesión"))),
       );
     }
 
-
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: const Text("Mi perfil"),
+        automaticallyImplyLeading: false,
         actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications),
-                onPressed: () => showNotificationsDialog(context),
-              ),
-              if (hasNewNotification)
-                Positioned(
-                  right: 6,
-                  top: 6,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                    child: Text(
-                      unreadNotifications.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                )
-            ],
-          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -391,98 +367,58 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-
-            // FOTO DE PERFIL
             CircleAvatar(
               radius: 60,
-              backgroundImage: profileImage != null
-                  ? FileImage(profileImage!)
-                  : (profileImageUrl != null
-                      ? NetworkImage(profileImageUrl!)
-                      : const AssetImage("assets/profile_default.png"))
-                      as ImageProvider,
+              backgroundImage: (() {
+                if (profileImageBytes != null) {
+                  return MemoryImage(profileImageBytes!) as ImageProvider;
+                } else if (profileImageUrl != null &&
+                    profileImageUrl!.isNotEmpty) {
+                  return NetworkImage(profileImageUrl!) as ImageProvider;
+                } else {
+                  return const AssetImage("assets/profile_default.png")
+                      as ImageProvider;
+                }
+              })(),
             ),
-
             TextButton(
               onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (_) => Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.photo),
-                        title: const Text("Elegir galería"),
-                        onTap: () {
-                          Navigator.pop(context);
-                          pickImage(ImageSource.gallery);
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.camera_alt),
-                        title: const Text("Tomar foto"),
-                        onTap: () {
-                          Navigator.pop(context);
-                          pickImage(ImageSource.camera);
-                        },
-                      ),
-                    ],
-                  ),
-                );
+                pickImage(ImageSource.gallery);
               },
               child: const Text("Cambiar foto"),
             ),
-
             const SizedBox(height: 20),
-
             TextField(
-              controller: _nombre,
-              decoration: const InputDecoration(labelText: "Nombre"),
-            ),
-
+                controller: _nombre,
+                decoration: const InputDecoration(labelText: "Nombre")),
             const SizedBox(height: 15),
-
             TextField(
-              controller: _apellido,
-              decoration: const InputDecoration(labelText: "Apellido"),
-            ),
-
+                controller: _apellido,
+                decoration: const InputDecoration(labelText: "Apellido")),
             const SizedBox(height: 15),
-
             TextField(
-              controller: _curp,
-              decoration: const InputDecoration(labelText: "CURP"),
-              textCapitalization: TextCapitalization.characters,
-            ),
-
+                controller: _curp,
+                decoration: const InputDecoration(labelText: "CURP"),
+                textCapitalization: TextCapitalization.characters),
             const SizedBox(height: 15),
-
             TextField(
-              controller: _email,
-              enabled: false,
-              decoration: const InputDecoration(labelText: "Correo"),
-            ),
-
+                controller: _email,
+                enabled: false,
+                decoration: const InputDecoration(labelText: "Correo")),
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: _changeEmailDialog,
-                    child: const Text("Cambiar correo"),
-                  ),
-                ),
+                    child: OutlinedButton(
+                        onPressed: _changeEmailDialog,
+                        child: const Text("Cambiar correo"))),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: _changePassDialog,
-                    child: const Text("Cambiar contraseña"),
-                  ),
-                ),
+                    child: OutlinedButton(
+                        onPressed: _changePassDialog,
+                        child: const Text("Cambiar contraseña"))),
               ],
             ),
-
             const SizedBox(height: 25),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
