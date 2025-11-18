@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:prueba2app/home_page_content.dart'; 
+import '../theme/colors.dart';
 
 
 class ViviendaPage extends StatefulWidget { 
@@ -21,10 +22,18 @@ class _ViviendaPageState extends State<ViviendaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: const Text('Programas de Vivienda'), 
-        backgroundColor: Colors.brown,
+        title: Text(
+          'Vivienda',
+          style: TextStyle(
+            color: primaryColor.darker,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        centerTitle: true,
+        elevation: 0,
       ),
       body: SafeArea(
         child: Padding(

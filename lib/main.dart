@@ -1,11 +1,18 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // 📌 Necesario para bloquear orientación
 import 'package:prueba2app/firebase_options.dart';
-import 'package:prueba2app/theme/colors.dart'; 
-import 'auth_checker.dart'; // ¡Importamos el comprobador de estado!
+import 'package:prueba2app/theme/colors.dart';
+import 'auth_checker.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔒 BLOQUEO DE ORIENTACIÓN A VERTICAL
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   if (Firebase.apps.isEmpty) {
     try {
@@ -18,9 +25,7 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-
 class MyApp extends StatelessWidget {
-  // ... (El resto de tu código 'MyApp' no necesita cambios)
   const MyApp({super.key});
 
   @override
@@ -31,7 +36,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: primaryColor, //usa tu color global
+          seedColor: primaryColor,
           primary: primaryColor,
           background: backgroundColor,
         ),
@@ -41,4 +46,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 

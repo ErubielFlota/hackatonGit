@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:prueba2app/theme/colors.dart';
 
+
+//-------------------------------------------------------------
+//    MODELO DE PROGRAMA
+//-------------------------------------------------------------
 class Programa {
   final String id;
   final String nombre;
@@ -56,7 +60,6 @@ class Programa {
     final finTimestamp = data['fin'] as Timestamp?;
 
     return Programa(
-      // --- Campos existentes ---
       id: doc.id,
       nombre: data['titulo'] ?? 'Programa sin nombre',
       descripcion: data['descripcion'] ?? 'Sin descripción.',
@@ -67,8 +70,6 @@ class Programa {
           DateTime.now().add(const Duration(days: 365)),
       localidad: data['localidad'] ?? 'Todas las localidades',
       categoria: data['categoria'] ?? 'Sin Categoría',
-
-      // --- Campos nuevos leídos desde Firebase ---
       objetivo: data['objetivo'] ?? 'Sin objetivo',
       dependencia: data['dependencia'] ?? 'No especificada',
       poblacionObjetivo: data['poblacionObjetivo'] ?? 'Población general',
@@ -92,6 +93,9 @@ class Programa {
   }
 }
 
+//-------------------------------------------------------------
+//    PÁGINA DE DETALLES
+//-------------------------------------------------------------
 class ProgramaDetailPage extends StatelessWidget {
   final Programa programa;
   const ProgramaDetailPage({super.key, required this.programa});
@@ -103,12 +107,8 @@ class ProgramaDetailPage extends StatelessWidget {
     }
   }
 
-  Widget _buildListSection(
-    BuildContext context, {
-    required String title,
-    required List<String> items,
-    required IconData icon,
-  }) {
+  Widget _buildListSection(BuildContext context,
+      {required List<String> items, required IconData icon}) {
     if (items.isEmpty) return const SizedBox.shrink();
 
     final colors = Theme.of(context).colorScheme;
@@ -139,13 +139,11 @@ class ProgramaDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoTile(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    VoidCallback? onTap,
-  }) {
+  Widget _buildInfoTile(BuildContext context,
+      {required String title,
+      required String subtitle,
+      required IconData icon,
+      VoidCallback? onTap}) {
     if (subtitle.isEmpty ||
         subtitle == 'No disponible' ||
         subtitle == 'No especificada' ||
@@ -155,12 +153,16 @@ class ProgramaDetailPage extends StatelessWidget {
     }
 
     final colors = Theme.of(context).colorScheme;
+
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: colors.primary),
       title: Text(
         title,
-        style: TextStyle(fontWeight: FontWeight.bold, color: colors.onSurface),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: colors.onSurface,
+        ),
       ),
       subtitle: Text(
         subtitle,
@@ -168,7 +170,8 @@ class ProgramaDetailPage extends StatelessWidget {
       ),
       onTap: onTap,
       trailing: onTap != null
-          ? Icon(Icons.open_in_new_rounded, size: 18, color: colors.outline)
+          ? Icon(Icons.open_in_new_rounded,
+              size: 18, color: colors.outline)
           : null,
     );
   }
@@ -181,17 +184,12 @@ class ProgramaDetailPage extends StatelessWidget {
   }) {
     final colors = Theme.of(context).colorScheme;
 
-    // Filtra los widgets "vacíos" (SizedBox.shrink)
     final validChildren = children
         .where((child) => !(child is SizedBox && child.height == 0.0))
         .toList();
 
-    // Si no hay NINGÚN widget con contenido, no muestra la tarjeta
-    if (validChildren.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    if (validChildren.isEmpty) return const SizedBox.shrink();
 
-    // Si hay contenido, crea la tarjeta expandible
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -223,45 +221,67 @@ class ProgramaDetailPage extends StatelessWidget {
     );
   }
 
+  //-------------------------------------------------------------
+  //    BUILD DETALLE
+  //-------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final size = MediaQuery.of(context).size;
-    final isWide=size.width>600;
+    final isWide = size.width > 900;
+    final horizontalPadding = isWide ? 48.0 : 16.0;
+    final imageHeight = isWide ? 360.0 : 200.0;
+    final titleStyle = Theme.of(context)
+        .textTheme
+        .headlineSmall
+        ?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: colors.onSurface,
+          fontSize: isWide ? 28 : null,
+        );
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text(programa.nombre),
-        backgroundColor: colors.primary,
+        title: Text(
+          programa.nombre,
+          overflow: TextOverflow.ellipsis,
+        ),
+        backgroundColor: backgroundColor,
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(isWide ? 32:16),
+        padding: EdgeInsets.all(horizontalPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // INFORMACIÓN ESTÁTICA (VISIBLE) La parte de arriba de la info de programas
-
+            // imagen principal
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Image.network(
                 programa.imagenUrl,
                 width: double.infinity,
-                height: isWide ? 300 : 200,
+                height: imageHeight,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    height: isWide ? 300 : 200,
+                    height: imageHeight,
                     color: colors.surfaceContainerHighest,
                     child: Center(
-                      child: Icon(Icons.error,
-                          size: 40, color: colors.onSurfaceVariant),
+                      child: Icon(
+                        Icons.error,
+                        size: isWide ? 56 : 40,
+                        color: colors.onSurfaceVariant,
+                      ),
                     ),
                   );
                 },
               ),
             ),
+
             const SizedBox(height: 20),
 
+            // etiqueta estado
             Align(
               alignment: Alignment.centerLeft,
               child: Container(
@@ -277,20 +297,16 @@ class ProgramaDetailPage extends StatelessWidget {
                   style: TextStyle(
                     color: colors.onSecondaryContainer,
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: isWide ? 15 : 14,
                   ),
                 ),
               ),
             ),
+
             const SizedBox(height: 15),
 
-            Text(
-              programa.nombre,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colors.onSurface,
-                  ),
-            ),
+            Text(programa.nombre, style: titleStyle),
+
             const Divider(height: 30, thickness: 1),
 
             Text(
@@ -301,22 +317,24 @@ class ProgramaDetailPage extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 10),
+
             Text(
               programa.descripcion,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: colors.onSurface),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colors.onSurface,
+                    fontSize: isWide ? 18 : 14,
+                  ),
             ),
+
             const SizedBox(height: 20),
 
-            // Localidad y Categoría fijos
             _buildInfoTile(
               context,
               title: 'Localidad',
               subtitle: programa.localidad,
               icon: Icons.location_on,
             ),
+
             _buildInfoTile(
               context,
               title: 'Categoría',
@@ -326,69 +344,53 @@ class ProgramaDetailPage extends StatelessWidget {
 
             const Divider(height: 30, thickness: 1),
 
-            //  INFORMACIÓN EXPANDIBLE
-
-            // Información Adicional ---
+            // Información adicional
             _buildExpansionCard(
               context,
               title: 'Información Adicional',
               icon: Icons.info_outline,
               children: [
                 _buildInfoTile(
-                  context,
-                  title: 'Objetivo',
-                  subtitle: programa.objetivo,
-                  icon: Icons.track_changes,
-                ),
+                    context,
+                    title: 'Objetivo',
+                    subtitle: programa.objetivo,
+                    icon: Icons.track_changes),
+                _buildInfoTile(context,
+                    title: 'Dependencia',
+                    subtitle: programa.dependencia,
+                    icon: Icons.account_balance),
                 _buildInfoTile(
-                  context,
-                  title: 'Dependencia',
-                  subtitle: programa.dependencia,
-                  icon: Icons.account_balance,
-                ),
+                    context,
+                    title: 'Población Objetivo',
+                    subtitle: programa.poblacionObjetivo,
+                    icon: Icons.group),
                 _buildInfoTile(
-                  context,
-                  title: 'Población Objetivo',
-                  subtitle: programa.poblacionObjetivo,
-                  icon: Icons.group,
-                ),
-                _buildInfoTile(
-                  context,
-                  title: 'Zona de Aplicación',
-                  subtitle: programa.zonaAplicacion,
-                  icon: Icons.public,
-                ),
+                    context,
+                    title: 'Zona de Aplicación',
+                    subtitle: programa.zonaAplicacion,
+                    icon: Icons.public),
               ],
             ),
 
-            // Proceso de Registro ---
+            // Información de registro
             _buildExpansionCard(
               context,
               title: 'Información de registro',
               icon: Icons.how_to_reg_outlined,
               children: [
-                _buildListSection(
-                  context,
-                  title: 'Requisitos', // El título ahora se usa internamente
-                  items: programa.requisitos,
-                  icon: Icons.check_box_outline_blank_rounded,
-                ),
-                _buildListSection(
-                  context,
-                  title: 'Pasos de Registro',
-                  items: programa.pasosRegistro,
-                  icon: Icons.format_list_numbered_rounded,
-                ),
-                _buildListSection(
-                  context,
-                  title: 'Documentación Necesaria',
-                  items: programa.documentacionNecesaria,
-                  icon: Icons.description_outlined,
-                ),
+                _buildListSection(context,
+                    items: programa.requisitos,
+                    icon: Icons.check_box_outline_blank_rounded),
+                _buildListSection(context,
+                    items: programa.pasosRegistro,
+                    icon: Icons.format_list_numbered_rounded),
+                _buildListSection(context,
+                    items: programa.documentacionNecesaria,
+                    icon: Icons.description_outlined),
               ],
             ),
 
-            //  Contacto y Enlaces ---
+            // Contacto y Enlaces
             _buildExpansionCard(
               context,
               title: 'Contacto y Enlaces',
@@ -399,14 +401,16 @@ class ProgramaDetailPage extends StatelessWidget {
                   title: 'Teléfono de Contacto',
                   subtitle: programa.telefonoContacto,
                   icon: Icons.phone_outlined,
-                  onTap: () => _launchUrl('tel:${programa.telefonoContacto}'),
+                  onTap: () =>
+                      _launchUrl('tel:${programa.telefonoContacto}'),
                 ),
                 _buildInfoTile(
                   context,
                   title: 'Correo de Contacto',
                   subtitle: programa.correoContacto,
                   icon: Icons.email_outlined,
-                  onTap: () => _launchUrl('mailto:${programa.correoContacto}'),
+                  onTap: () =>
+                      _launchUrl('mailto:${programa.correoContacto}'),
                 ),
                 _buildInfoTile(
                   context,
@@ -418,8 +422,7 @@ class ProgramaDetailPage extends StatelessWidget {
               ],
             ),
 
-            // ---  Imagen de Referencia ---
-            //
+            // Imagen de referencia
             _buildExpansionCard(
               context,
               title: 'Imagen de Referencia',
@@ -432,25 +435,29 @@ class ProgramaDetailPage extends StatelessWidget {
                       programa.imagenReferencia,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        width: double.infinity,
+                      height: null,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Container(
                         height: 150,
                         color: colors.surfaceContainerHighest,
                         child: Icon(Icons.image_not_supported,
                             color: colors.onSurfaceVariant),
                       ),
                     ),
-                  )
-                else
-                  const SizedBox.shrink(),
+                  ),
               ],
             ),
 
             const SizedBox(height: 30),
-            Text('Inicia: ${programa.inicio.toString().split(' ')[0]}',
-                style: TextStyle(color: colors.outline)),
-            Text('Finaliza: ${programa.fin.toString().split(' ')[0]}',
-                style: TextStyle(color: colors.outline)),
+
+            Text(
+              'Inicia: ${programa.inicio.toString().split(' ')[0]}',
+              style: TextStyle(color: colors.outline),
+            ),
+            Text(
+              'Finaliza: ${programa.fin.toString().split(' ')[0]}',
+              style: TextStyle(color: colors.outline),
+            ),
           ],
         ),
       ),
@@ -458,6 +465,9 @@ class ProgramaDetailPage extends StatelessWidget {
   }
 }
 
+//-------------------------------------------------------------
+//    LOCALIDADES DISPONIBLES
+//-------------------------------------------------------------
 const List<String> _localidadesDisponibles = [
   'Todas las Localidades',
   'Othón P. Blanco',
@@ -473,6 +483,9 @@ const List<String> _localidadesDisponibles = [
   'Bacalar',
 ];
 
+//-------------------------------------------------------------
+//    PRINCIPAL PAGE — HOME PAGE CONTENT
+//-------------------------------------------------------------
 class PrincipalPage extends StatefulWidget {
   const PrincipalPage({super.key});
 
@@ -490,48 +503,77 @@ class _PrincipalPageState extends State<PrincipalPage> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final mq = MediaQuery.of(context);
+    final width = mq.size.width;
+    final height = mq.size.height;
+
+    final bool isWide = width > 900;
+    final double horizontalPadding = isWide ? 48 : 16;
+    final double titleFontSize = isWide ? 28 : 20;
+    final double searchHeight = isWide ? 56 : 48;
+    final double cardImageSize = isWide ? 96 : 70;
+    final double cardVerticalPadding = isWide ? 16 : 12;
 
     return Scaffold(
-      backgroundColor: colors.surface,
+      // *************** NUEVO APPBAR ***************
+     appBar: AppBar(
+        title: Text(
+          'Programas',
+          style: TextStyle(
+            color: primaryColor.darker,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
+        elevation: 0,
+      ),
+
+      backgroundColor: backgroundColor,
+
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: 8,
+          ),
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Text(
-                  'Programas disponibles',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: primaryColor
-                            .darker, // Asumo que primaryColor está en tu theme
-                      ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Busque un programa en específico',
-                  prefixIcon: Icon(Icons.search, color: colors.primary),
-                  filled: true,
-                  fillColor: primaryColor.lighter.withOpacity(
-                      0.3), // Asumo que primaryColor está en tu theme
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
+              SizedBox(height: height * 0.01),
+
+              // --------------------- BUSCADOR -----------------------
+              SizedBox(
+                height: searchHeight,
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Busque un programa en específico',
+                    prefixIcon:
+                        Icon(Icons.search, color: colors.primary),
+                    filled: true,
+                    fillColor: primaryColor.lighter.withOpacity(0.3),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
+                  onChanged: (query) {
+                    setState(() => filtro = query);
+                  },
                 ),
-                onChanged: (query) {
-                  setState(() => filtro = query);
-                },
               ),
-              const SizedBox(height: 16),
+
+              SizedBox(height: height * 0.02),
+
+              // --------------------- SELECTOR LOCALIDAD -----------------------
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: isWide ? 8 : 6,
+                ),
                 decoration: BoxDecoration(
                   color: colors.surface,
                   borderRadius: BorderRadius.circular(24),
@@ -541,75 +583,112 @@ class _PrincipalPageState extends State<PrincipalPage> {
                   child: DropdownButton<String>(
                     isExpanded: true,
                     value: _localidadSeleccionada,
-                    icon: Icon(Icons.arrow_drop_down, color: colors.onSurface),
-                    style: TextStyle(color: colors.onSurface, fontSize: 16),
+                    icon: Icon(Icons.arrow_drop_down,
+                        color: colors.onSurface),
+                    style: TextStyle(
+                        color: colors.onSurface,
+                        fontSize: isWide ? 16 : 14),
                     onChanged: (String? newValue) {
                       setState(() {
                         _localidadSeleccionada = newValue!;
                       });
                     },
-                    items: _localidadesDisponibles
-                        .map<DropdownMenuItem<String>>((String value) {
+                    items:
+                        _localidadesDisponibles.map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value),
+                        child: Text(value,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
                       );
                     }).toList(),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+
+              SizedBox(height: height * 0.02),
+
+              //------------------------------------------------------------
+              //    LISTA DE PROGRAMAS
+              //------------------------------------------------------------
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: _programasCollection.snapshots(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                    if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(
+                          child: CircularProgressIndicator());
                     }
                     if (snapshot.hasError) {
                       return Center(
-                        child: Text('Error: ${snapshot.error}',
-                            style: TextStyle(color: colors.error)),
+                        child: Text(
+                          'Error: ${snapshot.error}',
+                          style: TextStyle(color: colors.error),
+                        ),
                       );
                     }
+
                     final allPrograms = snapshot.data!.docs
                         .map((doc) => Programa.fromFirestore(doc))
                         .toList();
-                    final programasFiltrados = allPrograms.where((p) {
+
+                    final programasFiltrados =
+                        allPrograms.where((p) {
                       final filtroNombre =
-                          p.nombre.toLowerCase().contains(filtro.toLowerCase());
-                      final filtroLocalidad = _localidadSeleccionada ==
-                              _localidadesDisponibles.first
-                          ? true
-                          : p.localidad == _localidadSeleccionada;
-                      return filtroNombre && filtroLocalidad;
+                          p.nombre.toLowerCase().contains(
+                                filtro.toLowerCase(),
+                              );
+
+                      final filtroLocalidad =
+                          _localidadSeleccionada ==
+                                  _localidadesDisponibles.first
+                              ? true
+                              : p.localidad ==
+                                  _localidadSeleccionada;
+
+                      return filtroNombre &&
+                          filtroLocalidad;
                     }).toList();
+
                     if (programasFiltrados.isEmpty) {
                       return Center(
                         child: Text(
                           'No se encontraron programas.',
-                          style: TextStyle(color: colors.onSurfaceVariant),
+                          style: TextStyle(
+                              color: colors.onSurfaceVariant),
                         ),
                       );
                     }
+
                     return AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 400),
-                      key: ValueKey(filtro + _localidadSeleccionada),
+                      duration:
+                          const Duration(milliseconds: 400),
+                      key: ValueKey(
+                          filtro + _localidadSeleccionada),
                       child: ListView.builder(
                         itemCount: programasFiltrados.length,
                         itemBuilder: (context, index) {
-                          final programa = programasFiltrados[index];
+                          final programa =
+                              programasFiltrados[index];
                           return InkWell(
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      ProgramaDetailPage(programa: programa),
+                                      ProgramaDetailPage(
+                                          programa:
+                                              programa),
                                 ),
                               );
                             },
-                            child: ProgramaCard(programa: programa),
+                            child: ProgramaCard(
+                              programa: programa,
+                              imageSize: cardImageSize,
+                              verticalPadding:
+                                  cardVerticalPadding,
+                            ),
                           );
                         },
                       ),
@@ -625,9 +704,20 @@ class _PrincipalPageState extends State<PrincipalPage> {
   }
 }
 
+//-------------------------------------------------------------
+//    TARJETA DE PROGRAMA
+//-------------------------------------------------------------
 class ProgramaCard extends StatelessWidget {
   final Programa programa;
-  const ProgramaCard({super.key, required this.programa});
+  final double imageSize;
+  final double verticalPadding;
+
+  const ProgramaCard({
+    super.key,
+    required this.programa,
+    this.imageSize = 70,
+    this.verticalPadding = 12,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -640,57 +730,84 @@ class ProgramaCard extends StatelessWidget {
       _ => colors.error,
     };
 
+    final mq = MediaQuery.of(context);
+    final width = mq.size.width;
+    final bool isWide = width > 900;
+    final double iconSize = imageSize * 0.55;
+    final double titleFont = isWide ? 18 : 16;
+
     return Card(
       elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: EdgeInsets.symmetric(vertical: verticalPadding),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(isWide ? 16 : 12),
         child: Row(
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
                 programa.imagenUrl,
-                width: 70,
-                height: 70,
+                width: imageSize,
+                height: imageSize,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 70,
-                  height: 70,
-                  color: colors.surfaceContainerHighest,
-                  child: Icon(Icons.image_not_supported,
-                      color: colors.onSurfaceVariant, size: 40),
-                ),
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: imageSize,
+                    height: imageSize,
+                    color: colors.surfaceContainerHighest,
+                    child: Icon(
+                      Icons.image_not_supported,
+                      color: colors.onSurfaceVariant,
+                      size: iconSize,
+                    ),
+                  );
+                },
               ),
             ),
-            const SizedBox(width: 12),
+
+            SizedBox(width: isWide ? 14 : 12),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     programa.nombre,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(
                           color: colors.onSurface,
                           fontWeight: FontWeight.w600,
+                          fontSize: titleFont,
                         ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
+
+                  SizedBox(height: isWide ? 8 : 6),
+
                   Row(
                     children: [
-                      Icon(Icons.location_on, size: 14, color: colors.primary),
+                      Icon(Icons.location_on,
+                          size: 14, color: colors.primary),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           programa.localidad,
-                          style:
-                              TextStyle(fontSize: 13, color: colors.onSurface),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: colors.onSurface,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
+
                   Row(
                     children: [
                       Icon(Icons.label_outline,
@@ -699,22 +816,26 @@ class ProgramaCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           programa.categoria,
-                          style:
-                              TextStyle(fontSize: 13, color: colors.onSurface),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: colors.onSurface,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+
+                  SizedBox(height: isWide ? 8 : 6),
+
                   Container(
                     decoration: BoxDecoration(
                       color: colorEstado.withOpacity(0.15),
                       border: Border.all(color: colorEstado),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
                     child: Text(
                       estado,
                       style: TextStyle(
@@ -727,6 +848,7 @@ class ProgramaCard extends StatelessWidget {
                 ],
               ),
             ),
+
             Icon(Icons.arrow_forward_ios,
                 size: 16, color: colors.onSurfaceVariant),
           ],
@@ -735,3 +857,5 @@ class ProgramaCard extends StatelessWidget {
     );
   }
 }
+
+

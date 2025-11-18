@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:prueba2app/home_page_content.dart'; 
+import '../theme/colors.dart';
 
 class AgriculturaPage extends StatefulWidget { 
   const AgriculturaPage({super.key});
@@ -20,10 +21,18 @@ class _AgriculturaPageState extends State<AgriculturaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: const Text('Programas de Agricultura'), 
-        backgroundColor: Colors.green,
+        title: Text(
+          'Agricultura',
+          style: TextStyle(
+            color: primaryColor.darker,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        centerTitle: true,
+        elevation: 0,
       ),
       body: SafeArea(
         child: Padding(
