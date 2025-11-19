@@ -4,6 +4,7 @@ import 'package:prueba2app/theme/colors.dart';
 import 'firebase_auth_dart.dart';
 import 'register.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // <--- ¡Asegúrate de que este import exista!
 
 class Autentificacion extends StatefulWidget {
   const Autentificacion({super.key});
@@ -28,7 +29,6 @@ class AuthPageState extends State<Autentificacion> {
 
 
   void _showVerificationPendingDialog(User user) {
-    // (Tu código original - Sin cambios)
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -72,6 +72,23 @@ class AuthPageState extends State<Autentificacion> {
 
                 if (reloadedUser != null && reloadedUser.emailVerified) {
                   
+                  // 🚨 CÓDIGO AÑADIDO: ACTUALIZAR FIRESTORE CON EL NUEVO CORREO VERIFICADO
+                  if (reloadedUser.email != user.email) {
+                      try {
+                          await FirebaseFirestore.instance
+                              .collection("usuarios_registrados")
+                              .doc(reloadedUser.uid)
+                              .set({
+                                  "correo": reloadedUser.email,
+                                  "correo_pendiente": FieldValue.delete(), // Limpia el campo temporal
+                              }, SetOptions(merge: true));
+                          print("Firestore: Correo actualizado a ${reloadedUser.email}");
+                      } catch (e) {
+                          print("Error actualizando Firestore después de la verificación de email: $e");
+                      }
+                  }
+                  // 🚨 FIN DEL CÓDIGO AÑADIDO
+                  
                   if (mounted) {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(builder: (context) => const HomePage()),
@@ -95,9 +112,7 @@ class AuthPageState extends State<Autentificacion> {
   }
 
 
-
   void _mostrarVentanaInvitado(BuildContext context) {
-    // (Tu código original - Sin cambios)
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -168,7 +183,6 @@ class AuthPageState extends State<Autentificacion> {
 
 
   Future<void> _handleSignIn() async {
-    // (Tu código original - Sin cambios)
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, ingresa tu correo y contraseña.')),
@@ -192,6 +206,7 @@ class AuthPageState extends State<Autentificacion> {
             );
           }
         } else {
+          // Esto se activa si es una cuenta nueva o si cambió el correo y está pendiente de verificación
           if (mounted) {
             _showVerificationPendingDialog(user);
           }
@@ -228,7 +243,7 @@ class AuthPageState extends State<Autentificacion> {
     }
   }
 
-  // ----- INICIO DEL CÓDIGO AÑADIDO -----
+  // ----- INICIO DEL CÓDIGO DE RESETEO DE CONTRASEÑA -----
 
   Future<void> _enviarCorreoReseteo(String email, BuildContext dialogContext) async {
     // Este 'dialogContext' es el contexto del Pop-Up
@@ -331,7 +346,7 @@ class AuthPageState extends State<Autentificacion> {
     );
   }
   
-  // ----- FIN DEL CÓDIGO AÑADIDO -----
+  // ----- FIN DEL CÓDIGO DE RESETEO DE CONTRASEÑA -----
 
 
   @override
@@ -506,9 +521,13 @@ class AuthPageState extends State<Autentificacion> {
                     
                     _mostrarVentanaInvitado(context);
                   },
-                  child:Text(
-                    'Omitir por ahora',
-                    style: TextStyle(fontSize: 20, color: primaryColor.darker),
+                  child: Text(
+                    'Continuar como invitado',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: primaryColor.darker,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
