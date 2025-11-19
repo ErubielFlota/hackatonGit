@@ -85,56 +85,62 @@ class _HomePageState extends State<HomePage> {
       // -----------------------------
       // 🔻 Barra de navegación responsiva
       // -----------------------------
-      bottomNavigationBar: Container(
-        color: primaryColor,
-        padding: EdgeInsets.symmetric(
-          horizontal: isWide ? 30 : 10,
+      bottomNavigationBar: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
         ),
-        child: Padding(
+        child: Container(
+          color: primaryColor,
           padding: EdgeInsets.symmetric(
-            vertical: isWide ? 14 : 10,
+            horizontal: isWide ? 30 : 10,
           ),
-          child: GNav(
-            backgroundColor: primaryColor,
-            color: Colors.black54,
-            iconSize: navIconSize,
-            textStyle: TextStyle(
-              fontSize: navTextSize,
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: isWide ? 14 : 10,
             ),
-            tabBackgroundColor: primaryColor.darker,
-            selectedIndex: _currentIndex,
-            tabBorderRadius: 50,
-            padding: navPadding,
-            gap: isWide ? 10 : 6,
-            onTabChange: _onTabChange,
-            tabs: [
-              GButton(
-                icon: Icons.home,
-                text: 'Principal',
-                iconActiveColor: Colors.white,
-                textColor: Colors.white,
+            child: GNav(
+              backgroundColor: primaryColor,
+              color: Colors.black54,
+              iconSize: navIconSize,
+              textStyle: TextStyle(
+                fontSize: navTextSize,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
               ),
-              GButton(
-                icon: Icons.window,
-                text: 'Categorías',
-                iconActiveColor: Colors.white,
-                textColor: Colors.white,
-              ),
-              GButton(
-                icon: Icons.comment,
-                text: 'Quejas',
-                iconActiveColor: Colors.white,
-                textColor: Colors.white,
-              ),
-              GButton(
-                icon: Icons.person,
-                text: 'Perfil',
-                iconActiveColor: Colors.white,
-                textColor: Colors.white,
-              ),
-            ],
+              tabBackgroundColor: primaryColor.darker,
+              selectedIndex: _currentIndex,
+              tabBorderRadius: 50,
+              padding: navPadding,
+              gap: isWide ? 10 : 6,
+              onTabChange: _onTabChange,
+              tabs: [
+                GButton(
+                  icon: Icons.home,
+                  text: 'Principal',
+                  iconActiveColor: Colors.white,
+                  textColor: Colors.white,
+                ),
+                GButton(
+                  icon: Icons.window,
+                  text: 'Categorías',
+                  iconActiveColor: Colors.white,
+                  textColor: Colors.white,
+                ),
+                GButton(
+                  icon: Icons.comment,
+                  text: 'Quejas',
+                  iconActiveColor: Colors.white,
+                  textColor: Colors.white,
+                ),
+                GButton(
+                  icon: Icons.person,
+                  text: 'Perfil',
+                  iconActiveColor: Colors.white,
+                  textColor: Colors.white,
+                ),
+              ],
+            ),
           ),
         ),
       ),

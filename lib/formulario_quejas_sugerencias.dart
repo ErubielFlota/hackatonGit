@@ -191,7 +191,7 @@ class _FormularioQuejasSugerenciasPageState
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: primaryColor,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 32, vertical: 14),
                   ),
@@ -252,8 +252,9 @@ class _FormularioQuejasSugerenciasPageState
                       return SizedBox(
                         width: constraints.maxWidth,
                         child: DropdownButtonFormField<String>(
+                          isExpanded: true,
                           hint: const Text('Selecciona el programa'),
-                          value: programaSeleccionado,
+                          initialValue: programaSeleccionado,
                           items: programas
                               .map((p) => DropdownMenuItem(
                                     value: p,
@@ -337,7 +338,7 @@ class _FormularioQuejasSugerenciasPageState
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : enviarMensaje,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
+                        backgroundColor: primaryColor,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
