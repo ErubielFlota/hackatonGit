@@ -1,5 +1,3 @@
-// lib/profile_page.dart 
-
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -9,7 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:prueba2app/autentificacion.dart';
-// import 'package:prueba2app/theme/colors.dart';
+import 'package:prueba2app/home_page_content.dart'; 
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -19,14 +17,13 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // Variables de estado para notificaciones (Sin cambios)
+
   List<String> notifications = ["hola canche.", "santi tamay."];
   int unreadNotifications = 2;
   bool get hasNewNotification => unreadNotifications > 0;
 
   void showNotificationsDialog(BuildContext context) {
     setState(() => unreadNotifications = 0);
-    // ... (Lógica de diálogo de notificaciones sin cambios)
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -63,7 +60,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   bool _saving = false;
 
-  // 💾 Almacenaremos los valores originales al cargar para detectar cambios
   String _originalNombre = '';
   String _originalApellido = '';
   String _originalCurp = '';
@@ -72,16 +68,13 @@ class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final RegExp _curpRegex = RegExp(r'^[A-Z]{4}\d{6}[HM][A-Z]{5}[0-9A-Z]\d$');
 
-  //  REMOVIDAS: _isEditingNombre, _isEditingApellido, _isEditingCurp.
-  // Los campos siempre estarán editables.
-
   @override
   void initState() {
     super.initState();
     _loadUserData();
   }
 
-  //  FUNCIÓN _loadUserData (Guarda los valores originales al cargar)
+  //  FUNCIÓN _loadUserData
   Future<void> _loadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -101,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _curp.text = data["curp"] ?? "";
         profileImageUrl = data["fotoUrl"];
 
-        // 🆕 Guardar valores originales
+        
         _originalNombre = _nombre.text;
         _originalApellido = _apellido.text;
         _originalCurp = _curp.text;
@@ -148,7 +141,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // ---------- FUNCIÓN DE SUBIDA BASE64 ----------
   Future<String?> _uploadProfileImage(String uid) async {
     if (profileImageBytes == null) {
       return profileImageUrl;
@@ -175,19 +167,18 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _validarCurp(String curp) =>
       _curpRegex.hasMatch(curp.trim().toUpperCase());
 
-  //  FUNCIÓN _saveProfile (Mantengo la lógica de confirmación de contraseña)
+  //  FUNCIÓN _saveProfile
   Future<void> _saveProfile() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    // 1. Detectar si hay cambios en los campos
+    // 1. Detectar si hay cambios
     final bool dataChanged = (_nombre.text.trim() != _originalNombre.trim()) ||
-                                 (_apellido.text.trim() != _originalApellido.trim()) ||
-                                 (_curp.text.trim().toUpperCase() != _originalCurp.trim().toUpperCase());
+                             (_apellido.text.trim() != _originalApellido.trim()) ||
+                             (_curp.text.trim().toUpperCase() != _originalCurp.trim().toUpperCase());
 
     final bool photoChanged = profileImageBytes != null;
 
-    // Si no hay cambios en datos ni foto, no hacemos nada
     if (!dataChanged && !photoChanged) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text("No hay cambios para guardar."),
@@ -208,13 +199,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
     String? password;
 
-    // 3. Si hay cambios en datos, solicitar y reautenticar con contraseña
+    // 3. Solicitar contraseña si hay cambios en datos
     if (dataChanged) {
         password = await _confirmPasswordDialog(context);
-        if (password == null) return; // Si el usuario cancela o hay error
+        if (password == null) return; 
 
         try {
-            // Reautenticar
             final cred = EmailAuthProvider.credential(
                 email: user.email!, password: password);
             await user.reauthenticateWithCredential(cred);
@@ -226,19 +216,16 @@ class _ProfilePageState extends State<ProfilePage> {
                          : "Error de autenticación: ${e.code}"),
                  backgroundColor: Colors.redAccent,
              ));
-             return; // Detenemos el proceso si la contraseña es incorrecta
+             return; 
         }
     }
 
-    // 4. Iniciar el guardado (tanto para cambios de foto como de datos)
     setState(() => _saving = true);
     print("[DEBUG] Guardando perfil...");
 
     try {
-      // 5. Subimos la foto (se ejecuta sin requerir password explícitamente)
       final photoUrl = await _uploadProfileImage(user.uid);
 
-      // 6. Actualizamos Auth (Display Name)
       final fullName = "${_nombre.text.trim()} ${_apellido.text.trim()}";
       if (fullName.trim().isNotEmpty) {
         await user.updateDisplayName(fullName);
@@ -247,7 +234,6 @@ class _ProfilePageState extends State<ProfilePage> {
       }
       await user.reload();
 
-      // 7. Guardamos en Firestore
       await FirebaseFirestore.instance
           .collection("usuarios_registrados")
           .doc(user.uid)
@@ -259,12 +245,9 @@ class _ProfilePageState extends State<ProfilePage> {
         "fotoUrl": photoUrl,
       }, SetOptions(merge: true));
 
-      // 8. Actualizamos la UI y los valores originales
       setState(() {
         profileImageUrl = photoUrl;
-        profileImageBytes = null; // Limpiar los bytes después de la subida exitosa
-
-        // 🔑 IMPORTANTE: Actualizar los valores originales al guardar
+        profileImageBytes = null; 
         _originalNombre = _nombre.text;
         _originalApellido = _apellido.text;
         _originalCurp = _curp.text;
@@ -286,7 +269,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  //  DIÁLOGO PARA CONFIRMAR CONTRASEÑA ANTES DE GUARDAR
   Future<String?> _confirmPasswordDialog(BuildContext context) async {
     final passCtrl = TextEditingController();
 
@@ -308,7 +290,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, null), // Retorna null si cancela
+              onPressed: () => Navigator.pop(ctx, null), 
               child: const Text("Cancelar")),
           ElevatedButton(
             child: const Text("Confirmar"),
@@ -319,17 +301,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     backgroundColor: Colors.orangeAccent));
                 return;
               }
-              Navigator.pop(ctx, passCtrl.text); // Retorna la contraseña
+              Navigator.pop(ctx, passCtrl.text); 
             },
           )
         ],
       ),
     );
   }
-
-  // ----------------------------------------------------------
-  // DIALOGOS DE CORREO / CONTRASEÑA (Se mantienen sin cambios)
-  // ----------------------------------------------------------
 
   void _changeEmailDialog() {
     final emailCtrl = TextEditingController();
@@ -567,7 +545,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  //  WIDGET DE TEXTFIELD SENCILLO (Sin lápiz de edición)
   Widget _buildSimpleField({
     required TextEditingController controller,
     required String labelText,
@@ -578,7 +555,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return TextField(
       controller: controller,
-      // Ahora siempre enabled (salvo que se indique lo contrario en la llamada)
       enabled: enabled,
       textCapitalization: textCapitalization,
       style: TextStyle(
@@ -586,15 +562,12 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       decoration: InputDecoration(
         labelText: labelText,
-        // Borde activo (si enabled es true)
         enabledBorder: const UnderlineInputBorder(
             borderSide: BorderSide(color: primaryColor),
         ),
-        // Borde deshabilitado (si enabled es false)
         disabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: Colors.grey.shade400),
         ),
-        // ❌ REMOVIDO: suffixIcon (Lápiz/X)
       ),
     );
   }
@@ -650,7 +623,6 @@ class _ProfilePageState extends State<ProfilePage> {
               })(),
             ),
 
-            // 🚫 El cambio de foto NO requiere contraseña
             TextButton(
               onPressed: () {
                 pickImage(ImageSource.gallery);
@@ -660,7 +632,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
             const SizedBox(height: 20),
 
-            // 📝 CAMPOS DE EDICIÓN PERMANENTE
+            // CAMPOS DE EDICIÓN
             _buildSimpleField(
               controller: _nombre,
               labelText: "Nombre",
@@ -680,14 +652,13 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 15),
 
-            // 🔒 CAMPO CORREO (Deshabilitado)
+            //CAMPO CORREO 
             _buildSimpleField(
               controller: _email,
               labelText: "Correo",
               enabled: false,
             ),
 
-            // ... (Botones de Correo y Contraseña sin cambios)
             Row(
               children: [
                 Expanded(
@@ -703,11 +674,9 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 25),
 
-            // ... (Botón Guardar)
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                // Ahora solo se deshabilita si está guardando
                 onPressed: _saving ? null : _saveProfile,
                 child: _saving
                     ? const CircularProgressIndicator(color: Colors.white)
@@ -715,7 +684,81 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
 
-            // ❌ REMOVIDO: El mensaje de ayuda del lápiz/X.
+            const SizedBox(height: 30),
+            const Divider(thickness: 1.5),
+            const SizedBox(height: 10),
+
+            
+            // SECCIÓN MIS FAVORITOS
+            
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Mis Programas Favoritos",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue[800]
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Stream para mostrar favoritos
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('usuarios_registrados')
+                  .doc(user.uid)
+                  .collection('favoritos')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                if (snapshot.hasError) {
+                  return const Text("Error al cargar favoritos");
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        Icon(Icons.star_outline, size: 50, color: Colors.grey[300]),
+                        const Text("Aún no tienes programas favoritos."),
+                      ],
+                    ),
+                  );
+                }
+
+                final favoriteDocs = snapshot.data!.docs;
+
+                return ListView.builder(
+                  shrinkWrap: true, 
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: favoriteDocs.length,
+                  itemBuilder: (context, index) {
+                    try {
+                      final programa = Programa.fromFirestore(favoriteDocs[index]);
+                      return InkWell(
+                        onTap: () {
+                           Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProgramaDetailPage(programa: programa),
+                            ),
+                          );
+                        },
+                        child: ProgramaCard(programa: programa),
+                      );
+                    } catch (e) {
+                      return const SizedBox.shrink(); 
+                    }
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
