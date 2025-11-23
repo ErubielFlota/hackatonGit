@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
-import 'pages/mujeres_page.dart';
-import 'pages/educacion_page.dart';
-import 'pages/agricultura_page.dart';
-import 'pages/vivienda_page.dart';
-import 'pages/mayores_page.dart';
+import 'package:prueba2app/pages/programasocial.dart';
+import 'package:prueba2app/pages/servicios.dart';     
+import 'package:prueba2app/pages/tramite.dart';      
 
 class CategoriesPage extends StatelessWidget {
   const CategoriesPage({super.key});
@@ -13,49 +11,39 @@ class CategoriesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
-    // Número de columnas según tamaño de pantalla
+
     int crossAxisCount;
     double childAspectRatio = 1;
 
     if (width >= 1200) {
-      crossAxisCount = 4; // Monitores grandes
+      crossAxisCount = 4; 
       childAspectRatio = 1.4;
     } else if (width >= 900) {
-      crossAxisCount = 3; // Pantallas de laptop
+      crossAxisCount = 3; 
       childAspectRatio = 1.3;
     } else if (width >= 600) {
-      crossAxisCount = 2; // Tablets o ventanas medianas
+      crossAxisCount = 2; 
       childAspectRatio = 1.1;
     } else {
-      crossAxisCount = 2; // Móviles
+      crossAxisCount = 2; 
       childAspectRatio = 0.90;
     }
 
     final List<Map<String, dynamic>> categories = [
       {
-        'title': 'Mujeres',
-        'icon': Icons.female,
-        'page': const ProgramasMujeresPage(),
+        'title': 'Programas Sociales',
+        'icon': Icons.groups_rounded,
+        'page': const ProgramasSocialesPage(),
       },
       {
-        'title': 'Educación',
-        'icon': Icons.school,
-        'page': const ProgramasEducacionPage(),
+        'title': 'Servicios',
+        'icon': Icons.design_services_rounded,
+        'page': const ServiciosPage(), 
       },
       {
-        'title': 'Agricultura',
-        'icon': Icons.agriculture,
-        'page': const AgriculturaPage(),
-      },
-      {
-        'title': 'Vivienda',
-        'icon': Icons.house,
-        'page': const ViviendaPage(),
-      },
-      {
-        'title': 'Mayores de edad',
-        'icon': Icons.elderly,
-        'page': const AdultosPage(),
+        'title': 'Trámites',
+        'icon': Icons.assignment_rounded,
+        'page': const TramitesPage(), 
       },
     ];
 
@@ -63,7 +51,7 @@ class CategoriesPage extends StatelessWidget {
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(
-          'Categorías de Programas',
+          'Categorias',
           style: TextStyle(
             color: primaryColor.darker,
             fontWeight: FontWeight.bold,
@@ -107,22 +95,31 @@ class CategoriesPage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      category['icon'],
-                      size: 60,
-                      color: primaryColor.darker,
+                    // Círculo de fondo para el icono (Opcional, para resaltar)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.4),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        category['icon'],
+                        size: 50,
+                        color: primaryColor.darker,
+                      ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 15),
                     Text(
                       category['title'],
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: textColor,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
+                    // Pequeña barra decorativa
                     Container(
                       width: 40,
                       height: 4,
@@ -141,4 +138,3 @@ class CategoriesPage extends StatelessWidget {
     );
   }
 }
-

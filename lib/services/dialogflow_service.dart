@@ -5,13 +5,13 @@ import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:uuid/uuid.dart';
 
 class DialogflowService {
-  //Configurar el bot
+  
   final String _locationId = 'us-central1';
 
-  // 👇 ¡PON TU ID DE AGENTE AQUÍ! (El que copiaste de la URL del navegador)
+  // ID DE AGENTE
   final String _agentId = '1d0a0cfd-ae1b-4fec-847b-23f8fddf6241'; 
 
-  // 👇 ¡AQUÍ ESTÁ EL ID DE TU ENTORNO "PRODUCCION"!
+  // ID DE ENTORNO "PRODUCCION"
   final String _environmentId = 'd78da970-5a2c-4d1d-b62b-1ffd0f2b83cc'; 
 
   final String _credentialsFile =
@@ -71,7 +71,7 @@ class DialogflowService {
           'DialogflowService no inicializado. Llama a init() antes.');
     }
 
-    // 👇 ¡MODIFICADO! Esta ruta ahora apunta a tu entorno "produccion"
+    // RUTA DEL ENTORNO "URL"
     final String sessionPath =
         'projects/$_projectId/locations/$_locationId/agents/$_agentId/environments/$_environmentId/sessions/$_sessionId';
 
