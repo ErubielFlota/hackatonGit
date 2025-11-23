@@ -341,7 +341,7 @@ class _FormularioQuejasSugerenciasPageState
                   Text(
                     categoriaSeleccionada == 'Comentario general' 
                         ? 'Asunto:'
-                        : 'Selecciona el ${categoriaSeleccionada.toLowerCase().substring(0, categoriaSeleccionada.length - 1)}:',
+                        : 'Selecciona el ${categoriaSeleccionada.toLowerCase().substring(0, categoriaSeleccionada.length)}:',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: fontBase),
                   ),
                   const SizedBox(height: 8),
