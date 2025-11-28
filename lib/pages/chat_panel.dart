@@ -3,11 +3,9 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../services/dialogflow_service.dart';
 import '../services/faq_service.dart';
 
-// 1. Modificamos la clase para saber si es un mensaje de texto normal
-// o si es la IMAGEN DE BIENVENIDA.
 class _Message {
   final String? text;
-  final bool isWelcomeImage; // Nuevo campo para identificar la imagen grande
+  final bool isWelcomeImage; 
   final bool fromUser;
   
   _Message({
@@ -34,7 +32,6 @@ class _ChatPanelState extends State<ChatPanel>
 
   final DialogflowService _dialogflowService = DialogflowService();
 
-  // Ruta de la imagen (se usa tanto para la grande como para el avatar pequeño)
   final String botAvatarAsset = 'assets/leoncibot.png';
 
   @override
@@ -43,7 +40,6 @@ class _ChatPanelState extends State<ChatPanel>
     _faqService = FaqService();
     _faqService.init();
 
-    // 2. Agregamos AMBOS: La imagen grande primero, y luego el saludo
     _addInitialContent();
 
     _initDialogflow();
@@ -51,15 +47,15 @@ class _ChatPanelState extends State<ChatPanel>
 
   void _addInitialContent() {
     setState(() {
-      // A) Primero insertamos el mensaje que solo contiene la imagen grande
+      // mensaje con la imagen
       _messages.add(_Message(
         isWelcomeImage: true, 
         fromUser: false
       ));
       
-      // B) Luego insertamos el saludo de texto normal
+      // mensaje de saludo
       _messages.add(_Message(
-        text: "¡Hola! Soy Leoncibot. ¿En qué puedo ayudarte hoy?",
+        text: "¡Hola! Soy Leoncibot tu aistente ChatBot. ¿En qué puedo ayudarte hoy?👋🏻",
         fromUser: false,
       ));
     });
@@ -167,7 +163,7 @@ class _ChatPanelState extends State<ChatPanel>
                   itemBuilder: (context, index) {
                     final m = _messages[index];
 
-                    // CASO 1: ES LA IMAGEN DE BIENVENIDA (GRANDE)
+                    // imagen de bienvenida
                     if (m.isWelcomeImage) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -184,7 +180,7 @@ class _ChatPanelState extends State<ChatPanel>
                               ]
                             ),
                             child: CircleAvatar(
-                              radius: 80, // Tamaño grande para la presentación
+                              radius: 80, // tamaño grande para presentar
                               backgroundColor: Colors.grey.shade100,
                               backgroundImage: AssetImage(botAvatarAsset),
                             ),
@@ -193,7 +189,7 @@ class _ChatPanelState extends State<ChatPanel>
                       );
                     }
                     
-                    // CASO 2: MENSAJE DEL USUARIO
+                    // mensaje del usuario
                     if (m.fromUser) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -206,21 +202,21 @@ class _ChatPanelState extends State<ChatPanel>
                       );
                     } 
                     
-                    // CASO 3: MENSAJE DEL BOT (TEXTO NORMAL CON AVATAR PEQUEÑO)
+                    // texto con avatar
                     else {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Avatar pequeño
+                            
                             CircleAvatar(
                               backgroundImage: AssetImage(botAvatarAsset),
                               radius: 16, 
                               backgroundColor: Colors.grey.shade200,
                             ),
                             SizedBox(width: 8),
-                            // Burbuja de texto
+                            
                             Flexible(child: _buildTextBubble(m)),
                           ],
                         ),
@@ -230,7 +226,7 @@ class _ChatPanelState extends State<ChatPanel>
                 ),
               ),
 
-              // --- INPUT DE TEXTO ---
+              
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                  decoration: BoxDecoration(
