@@ -18,13 +18,10 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // --- MODIFICACIÓN 1: VARIABLES PARA NOTIFICACIONES ---
-  // Contador local para saber si el usuario ya vio las notificaciones en esta sesión
+
   int _notificacionesVistasCount = 0;
 
-  // --- MODIFICACIÓN 2: DIÁLOGO CONECTADO A FIREBASE ---
   void showNotificationsDialog(BuildContext context) {
-    // Al abrir el diálogo, asumimos que el usuario ve todo y "borramos" el badge rojo localmente
     setState(() {
       _notificacionesVistasCount = 999999; 
     });
@@ -35,12 +32,12 @@ class _ProfilePageState extends State<ProfilePage> {
         title: const Text("Notificaciones"),
         content: SizedBox(
           width: double.maxFinite,
-          height: 400, // Altura para el scroll
+          height: 400,
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('notificaciones_generales')
-                .orderBy('fecha', descending: true) // Las más nuevas primero
-                .limit(20) // Limitamos a las últimas 20 para no cargar demasiado
+                .orderBy('fecha', descending: true) 
+                .limit(20)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) return const Text("Error al cargar");
@@ -69,7 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     fechaStr = "${dt.day}/${dt.month} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}";
                   }
 
-                  // Icono según el tipo de notificación
+                  
                   IconData iconNoti = Icons.notifications;
                   Color colorNoti = Colors.blue;
                   
@@ -159,7 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _originalApellido = _apellido.text;
         _originalCurp = _curp.text;
 
-        // LÓGICA DE SINCRONIZACIÓN DE CORREO:
+        
         if (data["correo"] == null && user.email != null) {
           print("[DEBUG] Sincronizando nuevo correo en Firestore.");
           await FirebaseFirestore.instance
@@ -648,7 +645,7 @@ class _ProfilePageState extends State<ProfilePage> {
           title: Text(
             'Mi Perfil',
             style: TextStyle(
-              color: Colors.blue[800], // Ajustado al color que usas
+              color: Colors.blue[800],
               fontWeight: FontWeight.bold,
               fontSize: fontBase + 3,
             ),
@@ -707,7 +704,7 @@ class _ProfilePageState extends State<ProfilePage> {
         title: Text(user.displayName ?? "Mi perfil"),
         automaticallyImplyLeading: false,
         actions: [
-          // --- MODIFICACIÓN 3: BADGE Y CAMPANA CONECTADA ---
+          
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('notificaciones_generales')
@@ -718,7 +715,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 totalDocs = snapshot.data!.docs.length;
               }
               
-              // Si hay más docs en la nube que los que hemos "visto", mostramos badge
+              
               bool showBadge = totalDocs > 0 && totalDocs > _notificacionesVistasCount;
 
               return Stack(
@@ -793,7 +790,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
             const SizedBox(height: 20),
 
-            // CAMPOS DE EDICIÓN
+            
             _buildSimpleField(
               controller: _nombre,
               labelText: "Nombre",
