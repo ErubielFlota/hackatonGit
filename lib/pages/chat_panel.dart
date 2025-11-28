@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:prueba2app/theme/colors.dart';
 import '../services/dialogflow_service.dart';
 import '../services/faq_service.dart';
 
@@ -123,8 +124,14 @@ class _ChatPanelState extends State<ChatPanel>
   Widget build(BuildContext context) {
     return Material(
       elevation: 10,
+       borderRadius: BorderRadius.circular(24),
       child: Container(
-        color: Colors.white,
+        decoration: BoxDecoration(
+          color: Colors.white,
+           borderRadius: BorderRadius.circular(24),
+
+        ),
+        
         child: SafeArea(
           child: Column(
             children: [
@@ -254,7 +261,7 @@ class _ChatPanelState extends State<ChatPanel>
                     ),
                     SizedBox(width: 8),
                     CircleAvatar(
-                      backgroundColor: _dfReady ? Colors.blue : Colors.grey,
+                      backgroundColor: _dfReady ? primaryColor.darker : Colors.grey,
                       child: IconButton(
                         icon: Icon(Icons.send, color: Colors.white, size: 20),
                         onPressed: _dfReady ? () => _send(_controller.text) : null,
