@@ -8,8 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:prueba2app/autentificacion.dart';
 import 'package:prueba2app/home_page_content.dart';
-import 'package:prueba2app/theme/colors.dart'; 
-
+import 'package:prueba2app/theme/colors.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -19,27 +18,88 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  // --- MODIFICACIÓN 1: VARIABLES PARA NOTIFICACIONES ---
+  // Contador local para saber si el usuario ya vio las notificaciones en esta sesión
+  int _notificacionesVistasCount = 0;
 
-  List<String> notifications = ["hola canche.", "santi tamay."];
-  int unreadNotifications = 2;
-  bool get hasNewNotification => unreadNotifications > 0;
-
+  // --- MODIFICACIÓN 2: DIÁLOGO CONECTADO A FIREBASE ---
   void showNotificationsDialog(BuildContext context) {
-    setState(() => unreadNotifications = 0);
+    // Al abrir el diálogo, asumimos que el usuario ve todo y "borramos" el badge rojo localmente
+    setState(() {
+      _notificacionesVistasCount = 999999; 
+    });
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("Notificaciones"),
         content: SizedBox(
           width: double.maxFinite,
-          child: ListView(
-            shrinkWrap: true,
-            children: notifications
-                .map((n) => ListTile(
-                      leading: const Icon(Icons.notifications),
-                      title: Text(n),
-                    ))
-                .toList(),
+          height: 400, // Altura para el scroll
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('notificaciones_generales')
+                .orderBy('fecha', descending: true) // Las más nuevas primero
+                .limit(20) // Limitamos a las últimas 20 para no cargar demasiado
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) return const Text("Error al cargar");
+              
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final docs = snapshot.data!.docs;
+
+              if (docs.isEmpty) {
+                return const Center(child: Text("Sin notificaciones nuevas"));
+              }
+
+              return ListView.separated(
+                itemCount: docs.length,
+                separatorBuilder: (ctx, i) => const Divider(),
+                itemBuilder: (ctx, index) {
+                  final data = docs[index].data() as Map<String, dynamic>;
+                  
+                  // Formato de fecha simple
+                  String fechaStr = "";
+                  if (data['fecha'] != null) {
+                    Timestamp t = data['fecha'];
+                    DateTime dt = t.toDate();
+                    fechaStr = "${dt.day}/${dt.month} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}";
+                  }
+
+                  // Icono según el tipo de notificación
+                  IconData iconNoti = Icons.notifications;
+                  Color colorNoti = Colors.blue;
+                  
+                  if (data['tipo'] == 'nuevo') {
+                    iconNoti = Icons.new_releases;
+                    colorNoti = Colors.orange;
+                  } else if (data['tipo'] == 'actualizacion') {
+                    iconNoti = Icons.update;
+                    colorNoti = Colors.green;
+                  }
+
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(iconNoti, color: colorNoti),
+                    title: Text(
+                      data['titulo'] ?? 'Aviso',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(data['mensaje'] ?? ''),
+                        const SizedBox(height: 4),
+                        Text(fechaStr, style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ),
         actions: [
@@ -65,7 +125,6 @@ class _ProfilePageState extends State<ProfilePage> {
   String _originalNombre = '';
   String _originalApellido = '';
   String _originalCurp = '';
-
 
   final _formKey = GlobalKey<FormState>();
   final RegExp _curpRegex = RegExp(r'^[A-Z]{4}\d{6}[HM][A-Z]{5}[0-9A-Z]\d$');
@@ -96,27 +155,25 @@ class _ProfilePageState extends State<ProfilePage> {
         _curp.text = data["curp"] ?? "";
         profileImageUrl = data["fotoUrl"];
 
-        
         _originalNombre = _nombre.text;
         _originalApellido = _apellido.text;
         _originalCurp = _curp.text;
 
-
         // LÓGICA DE SINCRONIZACIÓN DE CORREO:
         if (data["correo"] == null && user.email != null) {
-            print("[DEBUG] Sincronizando nuevo correo en Firestore.");
-            await FirebaseFirestore.instance
-                .collection("usuarios_registrados")
-                .doc(user.uid)
-                .set({
-                    "correo": user.email,
-                    "correoPendiente": FieldValue.delete()
-                }, SetOptions(merge: true));
+          print("[DEBUG] Sincronizando nuevo correo en Firestore.");
+          await FirebaseFirestore.instance
+              .collection("usuarios_registrados")
+              .doc(user.uid)
+              .set({
+            "correo": user.email,
+            "correoPendiente": FieldValue.delete()
+          }, SetOptions(merge: true));
         } else if (data["correo"] != user.email && user.email != null) {
-           await FirebaseFirestore.instance
-                .collection("usuarios_registrados")
-                .doc(user.uid)
-                .set({"correo": user.email}, SetOptions(merge: true));
+          await FirebaseFirestore.instance
+              .collection("usuarios_registrados")
+              .doc(user.uid)
+              .set({"correo": user.email}, SetOptions(merge: true));
         }
       }
 
@@ -176,17 +233,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // 1. Detectar si hay cambios
     final bool dataChanged = (_nombre.text.trim() != _originalNombre.trim()) ||
-                             (_apellido.text.trim() != _originalApellido.trim()) ||
-                             (_curp.text.trim().toUpperCase() != _originalCurp.trim().toUpperCase());
+        (_apellido.text.trim() != _originalApellido.trim()) ||
+        (_curp.text.trim().toUpperCase() != _originalCurp.trim().toUpperCase());
 
     final bool photoChanged = profileImageBytes != null;
 
     if (!dataChanged && !photoChanged) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("No hay cambios para guardar."),
-            backgroundColor: Colors.blueAccent,
-        ));
-        return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("No hay cambios para guardar."),
+        backgroundColor: Colors.blueAccent,
+      ));
+      return;
     }
 
     // 2. Validar CURP
@@ -203,23 +260,23 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // 3. Solicitar contraseña si hay cambios en datos
     if (dataChanged) {
-        password = await _confirmPasswordDialog(context);
-        if (password == null) return; 
+      password = await _confirmPasswordDialog(context);
+      if (password == null) return;
 
-        try {
-            final cred = EmailAuthProvider.credential(
-                email: user.email!, password: password);
-            await user.reauthenticateWithCredential(cred);
-        } on FirebaseAuthException catch (e) {
-             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                 content: Text(
-                     e.code == 'wrong-password' || e.code == 'invalid-credential'
-                         ? "Contraseña incorrecta. Los datos no fueron guardados."
-                         : "Error de autenticación: ${e.code}"),
-                 backgroundColor: Colors.redAccent,
-             ));
-             return; 
-        }
+      try {
+        final cred = EmailAuthProvider.credential(
+            email: user.email!, password: password);
+        await user.reauthenticateWithCredential(cred);
+      } on FirebaseAuthException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              e.code == 'wrong-password' || e.code == 'invalid-credential'
+                  ? "Contraseña incorrecta. Los datos no fueron guardados."
+                  : "Error de autenticación: ${e.code}"),
+          backgroundColor: Colors.redAccent,
+        ));
+        return;
+      }
     }
 
     setState(() => _saving = true);
@@ -249,7 +306,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       setState(() {
         profileImageUrl = photoUrl;
-        profileImageBytes = null; 
+        profileImageBytes = null;
         _originalNombre = _nombre.text;
         _originalApellido = _apellido.text;
         _originalCurp = _curp.text;
@@ -259,7 +316,6 @@ class _ProfilePageState extends State<ProfilePage> {
         content: Text("Guardado con éxito"),
         backgroundColor: Colors.green,
       ));
-
     } catch (e) {
       print("[DEBUG] ERROR GENERAL AL GUARDAR: $e");
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -282,7 +338,8 @@ class _ProfilePageState extends State<ProfilePage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("Ingresa tu contraseña actual para confirmar los cambios en tus datos personales."),
+            const Text(
+                "Ingresa tu contraseña actual para confirmar los cambios en tus datos personales."),
             const SizedBox(height: 10),
             TextField(
                 controller: passCtrl,
@@ -292,7 +349,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, null), 
+              onPressed: () => Navigator.pop(ctx, null),
               child: const Text("Cancelar")),
           ElevatedButton(
             child: const Text("Confirmar"),
@@ -303,7 +360,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     backgroundColor: Colors.orangeAccent));
                 return;
               }
-              Navigator.pop(ctx, passCtrl.text); 
+              Navigator.pop(ctx, passCtrl.text);
             },
           )
         ],
@@ -397,33 +454,31 @@ class _ProfilePageState extends State<ProfilePage> {
           .collection("usuarios_registrados")
           .doc(user.uid)
           .set({
-            "correo": FieldValue.delete(),
-            "correoPendiente": trimmedNewEmail
-          }, SetOptions(merge: true));
+        "correo": FieldValue.delete(),
+        "correoPendiente": trimmedNewEmail
+      }, SetOptions(merge: true));
 
       Navigator.pop(ctx);
       await FirebaseAuth.instance.signOut();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-            "Se ha enviado un correo a ${trimmedNewEmail} para verificar el cambio. Por seguridad, debe volver a iniciar sesión."),
-          duration: const Duration(seconds: 8),
-          backgroundColor: Colors.blueAccent));
+            content: Text(
+                "Se ha enviado un correo a ${trimmedNewEmail} para verificar el cambio. Por seguridad, debe volver a iniciar sesión."),
+            duration: const Duration(seconds: 8),
+            backgroundColor: Colors.blueAccent));
 
         Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const Autentificacion()),
-            (Route<dynamic> route) => false,
+          MaterialPageRoute(builder: (context) => const Autentificacion()),
+          (Route<dynamic> route) => false,
         );
       }
-
     } on FirebaseAuthException catch (e) {
       Navigator.pop(ctx);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              e.code == 'email-already-in-use'
-                  ? "El correo ya está en uso por otra cuenta."
-                  : "Error al actualizar correo: ${e.code}"),
+          content: Text(e.code == 'email-already-in-use'
+              ? "El correo ya está en uso por otra cuenta."
+              : "Error al actualizar correo: ${e.code}"),
           backgroundColor: Colors.redAccent));
     } catch (e) {
       Navigator.pop(ctx);
@@ -524,14 +579,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-            "Contraseña actualizada con éxito. Por seguridad, debe volver a iniciar sesión."),
-          duration: Duration(seconds: 5),
-          backgroundColor: Colors.blueAccent));
+            content: Text(
+                "Contraseña actualizada con éxito. Por seguridad, debe volver a iniciar sesión."),
+            duration: Duration(seconds: 5),
+            backgroundColor: Colors.blueAccent));
 
         Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const Autentificacion()),
-            (Route<dynamic> route) => false,
+          MaterialPageRoute(builder: (context) => const Autentificacion()),
+          (Route<dynamic> route) => false,
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -578,14 +633,14 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
-
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isLarge = screenWidth > 600;
-    final double maxContentWidth = 500;
+    const primaryColor = Colors.blue;
+    const backgroundColor = Color(0xFFF5F5F5);
     final double padding = isLarge ? 32 : 20;
     final double fontBase = isLarge ? 18 : 15;
 
-  //codigo  del usuario no registrado por favor ya no le muevan malditos
+    //codigo  del usuario no registrado por favor ya no le muevan malditos
 
     if (user == null) {
       return Scaffold(
@@ -593,7 +648,7 @@ class _ProfilePageState extends State<ProfilePage> {
           title: Text(
             'Mi Perfil',
             style: TextStyle(
-              color: primaryColor.darker,
+              color: Colors.blue[800], // Ajustado al color que usas
               fontWeight: FontWeight.bold,
               fontSize: fontBase + 3,
             ),
@@ -651,45 +706,54 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: Text(user.displayName ?? "Mi perfil"),
         automaticallyImplyLeading: false,
+        actions: [
+          // --- MODIFICACIÓN 3: BADGE Y CAMPANA CONECTADA ---
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('notificaciones_generales')
+                .snapshots(),
+            builder: (context, snapshot) {
+              int totalDocs = 0;
+              if (snapshot.hasData) {
+                totalDocs = snapshot.data!.docs.length;
+              }
+              
+              // Si hay más docs en la nube que los que hemos "visto", mostramos badge
+              bool showBadge = totalDocs > 0 && totalDocs > _notificacionesVistasCount;
 
-
-
-      actions: [  // ÍCONO DE NOTIFICACIONES
-        Stack(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.notifications),
-              onPressed: () {
-                showNotificationsDialog(context);
-              },
-            ),
-
-            // BADGE ROJO
-            if (hasNewNotification)
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications),
+                    onPressed: () {
+                      showNotificationsDialog(context);
+                    },
                   ),
-                  child: Text(
-                    unreadNotifications.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                  if (showBadge)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Text(
+                          "!", 
+                          style: TextStyle(
+                            color: Colors.white, 
+                            fontSize: 10, 
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      
-        
-        
+                ],
+              );
+            }
+          ),
+
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -697,7 +761,7 @@ class _ProfilePageState extends State<ProfilePage> {
               if (mounted) Navigator.pop(context);
             },
           )
-      ],  
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -749,7 +813,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 15),
 
-            //CAMPO CORREO 
+            //CAMPO CORREO
             _buildSimpleField(
               controller: _email,
               labelText: "Correo",
@@ -785,17 +849,14 @@ class _ProfilePageState extends State<ProfilePage> {
             const Divider(thickness: 1.5),
             const SizedBox(height: 10),
 
-            
             // SECCIÓN MIS FAVORITOS
-            
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "Mis Programas Favoritos",
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue[800]
-                ),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[800]),
               ),
             ),
             const SizedBox(height: 10),
@@ -811,7 +872,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                
+
                 if (snapshot.hasError) {
                   return const Text("Error al cargar favoritos");
                 }
@@ -821,7 +882,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: [
-                        Icon(Icons.star_outline, size: 50, color: Colors.grey[300]),
+                        Icon(Icons.star_outline,
+                            size: 50, color: Colors.grey[300]),
                         const Text("Aún no tienes programas favoritos."),
                       ],
                     ),
@@ -831,25 +893,27 @@ class _ProfilePageState extends State<ProfilePage> {
                 final favoriteDocs = snapshot.data!.docs;
 
                 return ListView.builder(
-                  shrinkWrap: true, 
+                  shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: favoriteDocs.length,
                   itemBuilder: (context, index) {
                     try {
-                      final programa = Programa.fromFirestore(favoriteDocs[index]);
+                      final programa =
+                          Programa.fromFirestore(favoriteDocs[index]);
                       return InkWell(
                         onTap: () {
-                           Navigator.push(
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ProgramaDetailPage(programa: programa),
+                              builder: (context) =>
+                                  ProgramaDetailPage(programa: programa),
                             ),
                           );
                         },
                         child: ProgramaCard(programa: programa),
                       );
                     } catch (e) {
-                      return const SizedBox.shrink(); 
+                      return const SizedBox.shrink();
                     }
                   },
                 );

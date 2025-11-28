@@ -792,7 +792,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
 }
 
 
-//    TARJETA DE PROGRAMA (Card con Imagen miniatura y Favoritos)
+// UBICACIÓN: Al final de home_page_content.dart
 
 class ProgramaCard extends StatelessWidget {
   final Programa programa;
@@ -806,7 +806,6 @@ class ProgramaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final user = FirebaseAuth.instance.currentUser;
-    
     
     Color statusColor = Colors.grey;
     if (programa.estadoActual.toLowerCase().contains('vigente')) statusColor = Colors.green;
@@ -826,8 +825,7 @@ class ProgramaCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
-                
+                // IMAGEN DEL PROGRAMA
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
@@ -838,7 +836,6 @@ class ProgramaCard extends StatelessWidget {
                       programa.imagenUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                       
                         return Center(
                           child: Text(
                             programa.institucionAcronimo.length > 3 
@@ -858,7 +855,7 @@ class ProgramaCard extends StatelessWidget {
                 
                 const SizedBox(width: 12),
                 
-                
+                // INFORMACIÓN DEL PROGRAMA
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -867,7 +864,6 @@ class ProgramaCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                           
                             child: Padding(
                               padding: const EdgeInsets.only(right: 30.0), 
                               child: Text(
@@ -896,7 +892,6 @@ class ProgramaCard extends StatelessWidget {
                       
                       const SizedBox(height: 8),
                       
-                      
                       Wrap(
                         spacing: 6,
                         runSpacing: 6,
@@ -923,13 +918,12 @@ class ProgramaCard extends StatelessWidget {
             ),
           ),
 
-          
+          // --- BOTÓN DE FAVORITOS (AQUÍ ESTÁ EL CAMBIO) ---
           if (user != null)
             Positioned(
               top: 0,
               right: 0,
               child: StreamBuilder<DocumentSnapshot>(
-                
                 stream: FirebaseFirestore.instance
                     .collection('usuarios_registrados')
                     .doc(user.uid)
@@ -955,17 +949,55 @@ class ProgramaCard extends StatelessWidget {
                           .doc(programa.id);
 
                       if (isFav) {
-                        
-                        await favRef.delete();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Eliminado de favoritos"), duration: Duration(seconds: 1)),
+                        // --- LÓGICA DE CONFIRMACIÓN PARA ELIMINAR ---
+                        bool? confirmar = await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext ctx) {
+                            return AlertDialog(
+                              title: const Text("Eliminar de favoritos"),
+                              content: const Text("¿Realmente quieres eliminar este programa de tus favoritos?"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(ctx).pop(false),
+                                  child: const Text("Cancelar"),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.of(ctx).pop(true),
+                                  child: const Text(
+                                    "Eliminar", 
+                                    style: TextStyle(color: Colors.red)
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         );
+
+                        // Si el usuario presionó "Eliminar" (true)
+                        if (confirmar == true) {
+                          await favRef.delete();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Eliminado de favoritos"), 
+                                duration: Duration(seconds: 1)
+                              ),
+                            );
+                          }
+                        }
+                        // Si presionó cancelar o fuera del dialogo, no hace nada.
+
                       } else {
-                        
+                        // --- LÓGICA PARA AGREGAR (SIN CONFIRMACIÓN) ---
                         await favRef.set(programa.toMap());
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Agregado a favoritos"), duration: Duration(seconds: 1)),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Agregado a favoritos"), 
+                              duration: Duration(seconds: 1)
+                            ),
+                          );
+                        }
                       }
                     },
                   );

@@ -1,76 +1,58 @@
-// --- IMPORTACIONES BÁSICAS ---
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const { SessionsClient } = require("@google-cloud/dialogflow");
 
-// Inicializar Firebase Admin
-admin.initializeApp();
-
-// Configurar Express
-const app = express();
-app.use(cors({ origin: true }));
-app.use(bodyParser.json());
-
-// --- CONFIGURA AQUÍ TU PROJECT ID Y ID DEL AGENTE DE DIALOGFLOW ---
-const PROJECT_ID = "pruebahackaton-bfb64"; // <-- Tu Project ID de Firebase
-const SESSION_ID = "flutter_chat_session"; // Puede ser cualquiera
-const LANGUAGE_CODE = "es"; // Español
-
-// --- ¡AQUÍ! - INICIALIZACIÓN DEL CLIENTE DE DIALOGFLOW ---
-// Se saca del endpoint para que sea más eficiente y no se cree en cada llamada.
-// Y se usa tu keyFilename para la autenticación.
-const sessionClient = new SessionsClient({
-  projectId: PROJECT_ID,
-  keyFilename: "./service-account.json", // <-- ¡ASEGÚRATE DE INCLUIR ESTE ARCHIVO!
-});
-// -----------------------------------------------------------------
+const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { initializeApp } = require("firebase-admin/app");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 
 
-// --- ENDPOINT PRINCIPAL DEL CHATBOT ---
-app.post("/api/dialogflow", async (req, res) => {
-  try {
-    const userMessage = req.body.message;
+initializeApp();
+const db = getFirestore();
 
-    if (!userMessage) {
-      return res.status(400).json({ error: "Falta el mensaje del usuario" });
-    }
 
-    // --- ¡AQUÍ! ---
-    // Se elimina la inicialización de "sessionClient" de este lugar.
-    // Ya lo creamos arriba y lo estamos reutilizando.
+exports.notificarNuevoPrograma = onDocumentCreated("programas_sociales/{programaId}", (event) => {
+ 
+    const snapshot = event.data;
 
-    const sessionPath = sessionClient.projectAgentSessionPath(
-      PROJECT_ID,
-      SESSION_ID
-    );
+    if (!snapshot) {
+        return;
+    }
 
-    // Enviar texto a Dialogflow
-    const request = {
-      session: sessionPath,
-      queryInput: {
-        text: {
-          text: userMessage,
-          languageCode: LANGUAGE_CODE,
-        },
-      },
-    };
+    const nuevoPrograma = snapshot.data();
+    const nombre = nuevoPrograma.nombre_programa || 'Programa sin nombre';
 
-    const responses = await sessionClient.detectIntent(request);
-    const result = responses[0].queryResult;
 
-    // Devolver respuesta del bot
-    res.json({
-      query: result.queryText,
-      response: result.fulfillmentText,
-    });
-  } catch (error) {
-    console.error("Error al conectar con Dialogflow:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
+    return db.collection('notificaciones_generales').add({
+        titulo: '¡Nuevo Programa Disponible!',
+        mensaje: `Se ha agregado el programa "${nombre}" al catálogo.`,
+        fecha: FieldValue.serverTimestamp(),
+        programaId: event.params.programaId, 
+        tipo: 'nuevo'
+    });
 });
 
-// --- EXPORTAR FUNCIÓN PARA FIREBASE ---
-exports.api = functions.https.onRequest(app);
+
+exports.notificarCambioEstatus = onDocumentUpdated("programas_sociales/{programaId}", (event) => {
+    if (!event.data) {
+        return;
+    }
+
+    const antes = event.data.before.data();
+    const ahora = event.data.after.data();
+
+    const estadoAnterior = antes.estado_actual_programa ? antes.estado_actual_programa.toLowerCase() : '';
+    const estadoNuevo = ahora.estado_actual_programa ? ahora.estado_actual_programa.toLowerCase() : '';
+
+
+    if (estadoAnterior.includes('finalizado') && estadoNuevo.includes('vigente')) {
+        
+        const nombre = ahora.nombre_programa || 'Programa';
+
+        return db.collection('notificaciones_generales').add({
+            titulo: 'Programa Reactivado',
+            mensaje: `El programa "${nombre}" vuelve a estar Vigente. ¡Revisa los requisitos!`,
+            fecha: FieldValue.serverTimestamp(),
+            programaId: event.params.programaId,
+            tipo: 'actualizacion'
+        });
+    }
+    return null;
+});
