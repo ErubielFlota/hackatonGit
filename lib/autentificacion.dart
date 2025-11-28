@@ -334,6 +334,7 @@ class AuthPageState extends State<Autentificacion> {
                     style: TextStyle(fontSize: inputFont),
                     decoration: InputDecoration(
                       labelText: 'Contraseña',
+                      hintText:'Ingresa tu contraseña',
                       labelStyle: TextStyle(fontSize: smallText),
                       prefixIcon: Icon(Icons.lock, color: primaryColor.darker),
                       border: OutlineInputBorder(

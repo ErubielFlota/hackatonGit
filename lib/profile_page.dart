@@ -632,8 +632,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isLarge = screenWidth > 600;
-    const primaryColor = Colors.blue;
-    const backgroundColor = Color(0xFFF5F5F5);
+   
     final double padding = isLarge ? 32 : 20;
     final double fontBase = isLarge ? 18 : 15;
 
