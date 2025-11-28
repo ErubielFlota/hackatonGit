@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:prueba2app/pages/chat_panel.dart';
-import 'package:prueba2app/theme/colors.dart'; 
+import 'package:prueba2app/theme/colors.dart';
 
 class ChatbotFloating extends StatefulWidget {
-  const ChatbotFloating({super.key});
+  final bool isGuest; // ← NUEVO
+
+  const ChatbotFloating({super.key, required this.isGuest});
 
   @override
   State<ChatbotFloating> createState() => _ChatbotFloatingState();
@@ -14,6 +16,9 @@ class _ChatbotFloatingState extends State<ChatbotFloating> {
 
   @override
   Widget build(BuildContext context) {
+    // ← SI ES INVITADO, NO SE MUESTRA NADA
+    if (widget.isGuest) return const SizedBox.shrink();
+
     return Positioned(
       bottom: 20,
       right: 20,
@@ -26,7 +31,7 @@ class _ChatbotFloatingState extends State<ChatbotFloating> {
               }),
             )
           : FloatingActionButton(
-              backgroundColor:primaryColor.darker,
+              backgroundColor: primaryColor.darker,
               onPressed: () => setState(() => _isOpen = true),
               child: Icon(Icons.chat, color: primaryColor.lighter),
             ),

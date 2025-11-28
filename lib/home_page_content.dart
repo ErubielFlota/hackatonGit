@@ -601,6 +601,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         centerTitle: true,
         elevation: 0,

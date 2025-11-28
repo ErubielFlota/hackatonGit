@@ -6,7 +6,10 @@ import '/categories_page.dart';
 import 'formulario_quejas_sugerencias.dart';
 import '../theme/colors.dart';
 
-//  Importacion del chatbot
+// Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
+
+// Chatbot
 import 'widgets/chatbot_floating.dart';
 
 class HomePage extends StatefulWidget {
@@ -58,12 +61,15 @@ class _HomePageState extends State<HomePage> {
     final width = mq.size.width;
 
     final bool isWide = width > 900;
-
     final double navIconSize = isWide ? 30 : 22;
     final double navTextSize = isWide ? 16 : 12;
     final EdgeInsets navPadding = isWide
         ? const EdgeInsets.symmetric(vertical: 18, horizontal: 26)
         : const EdgeInsets.symmetric(vertical: 14, horizontal: 18);
+
+    //Detectar si el usuario es invitado/anónimo
+    final user = FirebaseAuth.instance.currentUser;
+    final bool isGuest = user?.isAnonymous ?? true;
 
     return Scaffold(
       body: Stack(
@@ -77,14 +83,11 @@ class _HomePageState extends State<HomePage> {
             },
           ),
 
-          // Chatbot flotante
-          const ChatbotFloating(),
+          // Chatbot flotante (solo para usuarios NO invitados)
+          ChatbotFloating(isGuest: isGuest),
         ],
       ),
 
-      // -----------------------------
-      // 🔻 Barra de navegación responsiva
-      // -----------------------------
       bottomNavigationBar: ClipRRect(
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
