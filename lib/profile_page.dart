@@ -645,7 +645,7 @@ class _ProfilePageState extends State<ProfilePage> {
           title: Text(
             'Mi Perfil',
             style: TextStyle(
-              color: Colors.blue[800],
+              color: primaryColor.darker,
               fontWeight: FontWeight.bold,
               fontSize: fontBase + 3,
             ),

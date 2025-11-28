@@ -290,6 +290,7 @@ class _FormularioQuejasSugerenciasPageState
             fontSize: fontBase + 3,
           ),
         ),
+        automaticallyImplyLeading: false,
         backgroundColor: backgroundColor,
         elevation: 0,
         centerTitle: true,

@@ -57,6 +57,7 @@ class CategoriesPage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+        automaticallyImplyLeading: false,
         backgroundColor: backgroundColor,
         centerTitle: true,
         elevation: 0,
