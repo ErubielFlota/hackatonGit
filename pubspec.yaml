@@ -45,6 +45,7 @@ flutter:
     - assets/logoblanco.png
     - assets/google_logo.png
     - assets/pruebahackaton-bfb64-cb3dbd690d75.json
+    - assets/leoncibot.png
 
 
   fonts:

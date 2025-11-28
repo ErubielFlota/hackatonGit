@@ -1,5 +1,2 @@
 node_modules/
 *.local
-
-# Claves secretas
-assets/pruebahackaton-bfb64-cb3dbd690d75.json
