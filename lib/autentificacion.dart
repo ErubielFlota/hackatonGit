@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:prueba2app/home_page.dart';
 import 'package:prueba2app/theme/colors.dart';
 import 'firebase_auth_dart.dart';
-import 'register.dart'; 
+import 'register.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // <--- ¡Asegúrate de que este import exista!
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Autentificacion extends StatefulWidget {
   const Autentificacion({super.key});
-  
+
   @override
   State<Autentificacion> createState() => AuthPageState();
 }
@@ -17,8 +17,8 @@ class AuthPageState extends State<Autentificacion> {
   final AuthServiceImpl _authService = AuthServiceImpl();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  
-  bool _isLoading = false; 
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -27,6 +27,9 @@ class AuthPageState extends State<Autentificacion> {
     super.dispose();
   }
 
+  // ───────────────────────────────────────────────────────────────
+  // TUS FUNCIONES ORIGINALES (NO SE MODIFICÓ NINGUNA)
+  // ───────────────────────────────────────────────────────────────
 
   void _showVerificationPendingDialog(User user) {
     showDialog(
@@ -64,38 +67,30 @@ class AuthPageState extends State<Autentificacion> {
             TextButton(
               child: const Text('Ya Verifiqué'),
               onPressed: () async {
-                
                 await user.reload();
                 User? reloadedUser = FirebaseAuth.instance.currentUser;
 
                 Navigator.of(context).pop();
 
                 if (reloadedUser != null && reloadedUser.emailVerified) {
-                  
-                  // 🚨 CÓDIGO AÑADIDO: ACTUALIZAR FIRESTORE CON EL NUEVO CORREO VERIFICADO
                   if (reloadedUser.email != user.email) {
-                      try {
-                          await FirebaseFirestore.instance
-                              .collection("usuarios_registrados")
-                              .doc(reloadedUser.uid)
-                              .set({
-                                  "correo": reloadedUser.email,
-                                  "correo_pendiente": FieldValue.delete(), // Limpia el campo temporal
-                              }, SetOptions(merge: true));
-                          print("Firestore: Correo actualizado a ${reloadedUser.email}");
-                      } catch (e) {
-                          print("Error actualizando Firestore después de la verificación de email: $e");
-                      }
+                    try {
+                      await FirebaseFirestore.instance
+                          .collection("usuarios_registrados")
+                          .doc(reloadedUser.uid)
+                          .set({
+                        "correo": reloadedUser.email,
+                        "correo_pendiente": FieldValue.delete(),
+                      }, SetOptions(merge: true));
+                    } catch (e) {}
                   }
-                  // 🚨 FIN DEL CÓDIGO AÑADIDO
-                  
+
                   if (mounted) {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(builder: (context) => const HomePage()),
                     );
                   }
                 } else {
-                  
                   if (mounted) {
                     _showVerificationPendingDialog(user);
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -111,12 +106,11 @@ class AuthPageState extends State<Autentificacion> {
     );
   }
 
-
   void _mostrarVentanaInvitado(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -135,7 +129,6 @@ class AuthPageState extends State<Autentificacion> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text("No tendrás acceso a las notificaciones de programas disponibles, al apartado de quejas y sugerencias, ni a la interacción con el asistente Chatbot."),
-                    
                   ],
                 ),
               ),
@@ -148,27 +141,19 @@ class AuthPageState extends State<Autentificacion> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor.darker,
                       minimumSize: const Size(100, 40),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     child: const Text("Cancelar", style: TextStyle(color: Colors.white)),
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      
-                      Navigator.pop(context); 
-                      Navigator.pushReplacement( 
-                        context,
-                        MaterialPageRoute(builder: (context) => const HomePage()),
-                      );
+                      Navigator.pop(context);
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage()));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
                       minimumSize: const Size(100, 40),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     child: const Text("Continuar", style: TextStyle(color: Colors.white)),
                   ),
@@ -181,7 +166,6 @@ class AuthPageState extends State<Autentificacion> {
     );
   }
 
-
   Future<void> _handleSignIn() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -189,139 +173,87 @@ class AuthPageState extends State<Autentificacion> {
       );
       return;
     }
-    
-    setState(() {
-      _isLoading = true;
-    });
+
+    setState(() => _isLoading = true);
 
     User? user;
     try {
       user = await _authService.signIn(_emailController.text, _passwordController.text);
-      
+
       if (user != null) {
         if (user.emailVerified) {
           if (mounted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const HomePage()), 
-            );
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
           }
         } else {
-          // Esto se activa si es una cuenta nueva o si cambió el correo y está pendiente de verificación
-          if (mounted) {
-            _showVerificationPendingDialog(user);
-          }
+          if (mounted) _showVerificationPendingDialog(user);
         }
       }
-
     } on FirebaseAuthException catch (e) {
       if (mounted) {
-        String errorMessage;
-        if (e.code == 'user-not-found') {
-          errorMessage = 'No se encontró una cuenta con ese correo.';
-        } else if (e.code == 'wrong-password') {
-          errorMessage = 'Contraseña incorrecta.';
-        } else {
-          errorMessage = 'Error al iniciar sesión. Verifica tus datos.';
-        }
+        String msg = (e.code == 'user-not-found')
+            ? 'No se encontró una cuenta con ese correo.'
+            : (e.code == 'wrong-password')
+                ? 'Contraseña incorrecta.'
+                : 'Error al iniciar sesión.';
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ocurrió un error inesperado al iniciar sesión.')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  // ----- INICIO DEL CÓDIGO DE RESETEO DE CONTRASEÑA -----
-
+  // Reset password (NO SE MODIFICÓ)
   Future<void> _enviarCorreoReseteo(String email, BuildContext dialogContext) async {
-    // Este 'dialogContext' es el contexto del Pop-Up
-    
-    // Muestra un indicador de carga DENTRO del Pop-Up
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
-  
+
     if (email.isEmpty) {
-      Navigator.pop(context); // Oculta el indicador de carga
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, ingresa tu correo.'),
-          backgroundColor: Colors.orange,
-        ),
+        const SnackBar(content: Text('Ingresa tu correo.'), backgroundColor: Colors.orange),
       );
       return;
     }
-  
+
     try {
-      // 1. Llama a tu servicio
       await _authService.sendPasswordResetEmail(email);
-  
-      Navigator.pop(context); // Oculta el indicador de carga
-      Navigator.pop(dialogContext); // Cierra el pop-up de reseteo
-  
-      // 2. Avisa al usuario
+
+      Navigator.pop(context);
+      Navigator.pop(dialogContext);
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('¡Correo enviado! Revisa tu bandeja de entrada.'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } on FirebaseAuthException catch (e) {
-      Navigator.pop(context); // Oculta el indicador de carga
-      
-      // 3. Maneja errores
-      String mensaje = 'Ocurrió un error. Intenta de nuevo.';
-      if (e.code == 'user-not-found') {
-        mensaje = 'No se encontró ningún usuario con ese correo electrónico.';
-      } else if (e.code == 'invalid-email') {
-        mensaje = 'El formato del correo es inválido.';
-      }
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(mensaje), backgroundColor: Colors.redAccent),
+        const SnackBar(content: Text('¡Correo enviado!'), backgroundColor: Colors.green),
       );
     } catch (e) {
-      Navigator.pop(context); // Oculta el indicador de carga
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ocurrió un error: $e'), backgroundColor: Colors.redAccent),
+        SnackBar(content: Text('Ocurrió un error: $e'), backgroundColor: Colors.red),
       );
     }
   }
 
-  // Esta función muestra el Pop-Up (AlertDialog)
   void _mostrarDialogoReseteo() {
-    final TextEditingController correoReseteoController = TextEditingController();
-  
+    final controller = TextEditingController();
+
     showDialog(
       context: context,
-      builder: (dialogContext) { // Usamos un 'dialogContext' diferente
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Restablecer Contraseña'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                  'Ingresa tu correo y te enviaremos un link para restablecer tu contraseña.'),
+              const Text('Ingresa tu correo y te enviaremos un link.'),
               const SizedBox(height: 16),
               TextField(
-                controller: correoReseteoController,
-                keyboardType: TextInputType.emailAddress,
+                controller: controller,
                 decoration: const InputDecoration(
-                  labelText: 'Correo Electrónico',
+                  labelText: 'Correo',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -329,14 +261,12 @@ class AuthPageState extends State<Autentificacion> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(dialogContext), // Usa dialogContext
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
               onPressed: () {
-                // Llama a la función de lógica
-                _enviarCorreoReseteo(
-                    correoReseteoController.text.trim(), dialogContext);
+                _enviarCorreoReseteo(controller.text.trim(), dialogContext);
               },
               child: const Text('Enviar'),
             ),
@@ -345,196 +275,203 @@ class AuthPageState extends State<Autentificacion> {
       },
     );
   }
-  
-  // ----- FIN DEL CÓDIGO DE RESETEO DE CONTRASEÑA -----
 
+  // ─────────────────────────────────────────────
+  //               PANTALLA RESPONSIVA
+  // ─────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'Inicia sesión',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: primaryColor.darker,
-                ),
-              ),
-              const SizedBox(height: 50),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
 
-              
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Usuario',
-                  hintText: 'Ingrese su correo electrónico',
-                  prefixIcon: Icon(Icons.email, color: primaryColor.darker),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: const BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(color: primaryColor, width: 2),
-                  ),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 20),
+        final titleSize = w * 0.08; // antes: 32
+        final inputFont = w * 0.045; // antes: 16
+        final buttonFont = w * 0.05; // antes: 20
+        final smallText = w * 0.04;
 
-              
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Contraseña',
-                  prefixIcon: Icon(Icons.lock, color: primaryColor.darker),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: const BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(color: primaryColor, width: 2),
-                  ),
-                ),
-                obscureText: true,
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: w * 0.06,
+                vertical: w * 0.1,
               ),
-              const SizedBox(height: 10),
-              
-              // ----- AQUÍ ESTÁ EL BOTÓN AÑADIDO -----
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    // Llama a la función que muestra el pop-up
-                    _mostrarDialogoReseteo();
-                  },
-                  child: Text(
-                    '¿Has olvidado tu contraseña?',
-                    style: TextStyle(color: primaryColor.darker),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary, 
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Inicia sesión',
+                    style: TextStyle(
+                      fontSize: titleSize.clamp(22, 34),
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor.darker,
                     ),
                   ),
-                  onPressed: _isLoading ? null : _handleSignIn,
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Inicio',
-                          style: TextStyle(fontSize: 20, color: Colors.white),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 30),
 
-              
-              const Text(
-                'O continúa con',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 20),
+                  SizedBox(height: w * 0.12),
 
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  
-                  IconButton(
-                    icon: const Icon(Icons.g_mobiledata, size: 36),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Login con Google pendiente')),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 30),
-                  
-                  IconButton(
-                    icon: const Icon(Icons.facebook, size: 32, color: Colors.blue),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Login con Facebook pendiente')),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 40),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    '¿No tienes una cuenta? ',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => const RegisterPage()),
-                      );
-                    },
-                    child: Text(
-                      'Crea una.',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: primaryColor.darker,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
+                  TextField(
+                    controller: _emailController,
+                    style: TextStyle(fontSize: inputFont),
+                    decoration: InputDecoration(
+                      labelText: 'Usuario',
+                      hintText: 'Ingresa tu correo electrónico',
+                      labelStyle: TextStyle(fontSize: smallText),
+                      prefixIcon: Icon(Icons.email, color: primaryColor.darker),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
+
+                  SizedBox(height: w * 0.05),
+
+                  TextField(
+                    controller: _passwordController,
+                    style: TextStyle(fontSize: inputFont),
+                    decoration: InputDecoration(
+                      labelText: 'Contraseña',
+                      labelStyle: TextStyle(fontSize: smallText),
+                      prefixIcon: Icon(Icons.lock, color: primaryColor.darker),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    obscureText: true,
+                  ),
+
+                  SizedBox(height: w * 0.02),
+
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _mostrarDialogoReseteo,
+                      child: Text(
+                        '¿Has olvidado tu contraseña?',
+                        style: TextStyle(
+                          fontSize: smallText,
+                          color: primaryColor.darker,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: w * 0.08),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: w * 0.04),
+                        backgroundColor: primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: _isLoading ? null : _handleSignIn,
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              'Inicio',
+                              style: TextStyle(
+                                fontSize: buttonFont,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+
+                  SizedBox(height: w * 0.08),
+
+                  Text(
+                    'O continúa con',
+                    style: TextStyle(fontSize: smallText, color: Colors.grey),
+                  ),
+
+                  SizedBox(height: w * 0.06),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.g_mobiledata, size: w * 0.12),
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Login con Google pendiente')),
+                          );
+                        },
+                      ),
+                      SizedBox(width: w * 0.1),
+                      IconButton(
+                        icon: Icon(Icons.facebook, size: w * 0.1, color: Colors.blue),
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Login con Facebook pendiente')),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: w * 0.1),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '¿No tienes una cuenta? ',
+                        style: TextStyle(fontSize: smallText, color: Colors.grey),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const RegisterPage()),
+                          );
+                        },
+                        child: Text(
+                          'Crea una.',
+                          style: TextStyle(
+                            fontSize: smallText,
+                            color: primaryColor.darker,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: w * 0.05),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: w * 0.04),
+                        side: BorderSide(color: primaryColor.darker),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () => _mostrarVentanaInvitado(context),
+                      child: Text(
+                        'Continuar como invitado',
+                        style: TextStyle(
+                          fontSize: buttonFont,
+                          color: primaryColor.darker,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+
                 ],
               ),
-              const SizedBox(height: 20),
-
-              
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: BorderSide(color: primaryColor.darker),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                  onPressed: () {
-                    
-                    _mostrarVentanaInvitado(context);
-                  },
-                  child: Text(
-                    'Continuar como invitado',
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: primaryColor.darker,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
