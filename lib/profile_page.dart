@@ -7,7 +7,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:prueba2app/autentificacion.dart';
-import 'package:prueba2app/home_page_content.dart'; 
+import 'package:prueba2app/home_page_content.dart';
+import 'package:prueba2app/theme/colors.dart'; 
+
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -576,15 +578,72 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
+
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isLarge = screenWidth > 600;
+    final double maxContentWidth = 500;
+    final double padding = isLarge ? 32 : 20;
+    final double fontBase = isLarge ? 18 : 15;
+
+  //codigo  del usuario no registrado por favor ya no le muevan malditos
+
     if (user == null) {
       return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Mi Perfil',
+            style: TextStyle(
+              color: primaryColor.darker,
+              fontWeight: FontWeight.bold,
+              fontSize: fontBase + 3,
+            ),
+          ),
+          automaticallyImplyLeading: false,
+          backgroundColor: backgroundColor,
+          elevation: 0,
+          centerTitle: true,
+        ),
+        backgroundColor: backgroundColor,
         body: Center(
-            child: ElevatedButton(
-                onPressed: () => Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const Autentificacion())),
-                child: const Text("Iniciar Sesión"))),
+          child: Padding(
+            padding: EdgeInsets.all(padding),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Debes iniciar sesión para acceder a esta página.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: fontBase + 1,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 25),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Autentificacion()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 14),
+                  ),
+                  child: Text(
+                    'Iniciar sesión',
+                    style: TextStyle(
+                      fontSize: fontBase + 1,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -592,7 +651,45 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: Text(user.displayName ?? "Mi perfil"),
         automaticallyImplyLeading: false,
-        actions: [
+
+
+
+      actions: [  // ÍCONO DE NOTIFICACIONES
+        Stack(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {
+                showNotificationsDialog(context);
+              },
+            ),
+
+            // BADGE ROJO
+            if (hasNewNotification)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    unreadNotifications.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      
+        
+        
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -600,7 +697,7 @@ class _ProfilePageState extends State<ProfilePage> {
               if (mounted) Navigator.pop(context);
             },
           )
-        ],
+      ],  
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
