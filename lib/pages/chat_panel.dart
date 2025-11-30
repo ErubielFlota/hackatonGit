@@ -3,15 +3,16 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:prueba2app/theme/colors.dart';
 import '../services/dialogflow_service.dart';
 import '../services/faq_service.dart';
+import '../services/voice_service.dart'; // <<< 1. IMPORTAR SERVICIO DE VOZ
 
 class _Message {
   final String? text;
-  final bool isWelcomeImage; 
+  final bool isWelcomeImage;
   final bool fromUser;
-  
+
   _Message({
-    this.text, 
-    this.isWelcomeImage = false, 
+    this.text,
+    this.isWelcomeImage = false,
     this.fromUser = false
   });
 }
@@ -32,6 +33,13 @@ class _ChatPanelState extends State<ChatPanel>
   bool _dfReady = false;
 
   final DialogflowService _dialogflowService = DialogflowService();
+  
+  // <<< 2. VARIABLES NUEVAS PARA VOZ
+  final VoiceService _voiceService = VoiceService(); 
+  bool _isRecording = false; 
+  // Usa un ID de sesión consistente. Si tu DialogflowService ya tiene uno, intenta usar el mismo.
+  // Por ahora generamos uno temporal o usamos uno fijo para pruebas.
+  final String _currentSessionId = "session-${DateTime.now().millisecondsSinceEpoch}"; 
 
   final String botAvatarAsset = 'assets/leoncibot.png';
 
@@ -48,13 +56,11 @@ class _ChatPanelState extends State<ChatPanel>
 
   void _addInitialContent() {
     setState(() {
-      // mensaje con la imagen
       _messages.add(_Message(
-        isWelcomeImage: true, 
+        isWelcomeImage: true,
         fromUser: false
       ));
-      
-      // mensaje de saludo
+
       _messages.add(_Message(
         text: "¡Hola! Soy Leoncibot tu aistente ChatBot. ¿En qué puedo ayudarte hoy?👋🏻",
         fromUser: false,
@@ -170,7 +176,6 @@ class _ChatPanelState extends State<ChatPanel>
                   itemBuilder: (context, index) {
                     final m = _messages[index];
 
-                    // imagen de bienvenida
                     if (m.isWelcomeImage) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -187,7 +192,7 @@ class _ChatPanelState extends State<ChatPanel>
                               ]
                             ),
                             child: CircleAvatar(
-                              radius: 80, // tamaño grande para presentar
+                              radius: 80,
                               backgroundColor: Colors.grey.shade100,
                               backgroundImage: AssetImage(botAvatarAsset),
                             ),
@@ -196,7 +201,6 @@ class _ChatPanelState extends State<ChatPanel>
                       );
                     }
                     
-                    // mensaje del usuario
                     if (m.fromUser) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -209,21 +213,18 @@ class _ChatPanelState extends State<ChatPanel>
                       );
                     } 
                     
-                    // texto con avatar
                     else {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            
                             CircleAvatar(
                               backgroundImage: AssetImage(botAvatarAsset),
                               radius: 16, 
                               backgroundColor: Colors.grey.shade200,
                             ),
                             SizedBox(width: 8),
-                            
                             Flexible(child: _buildTextBubble(m)),
                           ],
                         ),
@@ -233,7 +234,7 @@ class _ChatPanelState extends State<ChatPanel>
                 ),
               ),
 
-              
+              // --- AREA DE INPUT ---
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                  decoration: BoxDecoration(
@@ -246,20 +247,63 @@ class _ChatPanelState extends State<ChatPanel>
                       child: TextField(
                         controller: _controller,
                         decoration: InputDecoration(
-                          hintText: _dfReady ? 'Escribe un mensaje...' : 'Conectando...',
+                          hintText: _isRecording ? 'Grabando audio...' : (_dfReady ? 'Escribe un mensaje...' : 'Conectando...'), // Feedback visual
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(25),
                             borderSide: BorderSide.none
                           ),
                           filled: true,
                           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          fillColor: Colors.grey.shade100
+                          fillColor: _isRecording ? Colors.red.shade50 : Colors.grey.shade100 // Feedback de color
                         ),
                         onSubmitted: _send,
-                        enabled: _dfReady,
+                        enabled: _dfReady && !_isRecording, // Bloquear input si graba
                       ),
                     ),
+                    
                     SizedBox(width: 8),
+
+                    // <<< 3. BOTÓN DE MICRÓFONO
+                    GestureDetector(
+                      onLongPressStart: (_) async {
+                        if (!_dfReady) return;
+                        setState(() => _isRecording = true);
+                        await _voiceService.startRecording();
+                        debugPrint("Grabando...");
+                      },
+                      onLongPressEnd: (_) async {
+                        if (!_dfReady) return;
+                        setState(() => _isRecording = false);
+                        debugPrint("Enviando audio...");
+                        
+                        // Enviamos el audio y esperamos respuesta JSON
+                        final response = await _voiceService.stopRecordingAndSend(_currentSessionId);
+                        
+                        // Si hay respuesta exitosa
+                        if (response != null && response['text'] != null) {
+                           setState(() {
+                             // Agregamos la respuesta textual del bot al chat
+                             _messages.add(_Message(
+                               text: response['text'], 
+                               fromUser: false
+                             ));
+                           });
+                           // Nota: El audio ya se reproduce automáticamente dentro de voiceService
+                        }
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: _isRecording ? Colors.red : Colors.blueAccent, // Color cambia al grabar
+                        child: Icon(
+                          _isRecording ? Icons.mic : Icons.mic_none, 
+                          color: Colors.white, 
+                          size: 20
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(width: 8),
+
+                    // BOTÓN DE ENVIAR (Original)
                     CircleAvatar(
                       backgroundColor: _dfReady ? primaryColor.darker : Colors.grey,
                       child: IconButton(
