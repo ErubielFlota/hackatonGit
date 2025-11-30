@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../theme/colors.dart';
 
-// Importamos los componentes reutilizables (Modelo, Tarjeta, Detalle)
-// Ocultamos PrincipalPage para usar nuestra propia clase
+
 import 'package:prueba2app/home_page_content.dart' hide PrincipalPage;
 
 class ProgramasSocialesPage extends StatefulWidget {

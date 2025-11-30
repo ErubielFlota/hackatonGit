@@ -21,17 +21,17 @@ class _ChatbotFloatingState extends State<ChatbotFloating> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     // Ajustes para pantallas pequeñas
-    final panelWidth = screenWidth * 0.85;     // 85% del ancho
-    final panelHeight = screenHeight * 0.55;   // 55% del alto
+    final panelWidth = screenWidth * 0.85;    
+    final panelHeight = screenHeight * 0.55; 
 
-    // Tamaño del FAB responsivo
-    final fabSize = screenWidth * 0.16; // 16% del ancho (tamaño recomendado)
+    
+    final fabSize = screenWidth * 0.16; 
 
     if (widget.isGuest) return const SizedBox.shrink();
 
     return Positioned(
-      bottom: screenHeight * 0.03,  // 3% del alto
-      right: screenWidth * 0.04,    // 4% del ancho
+      bottom: screenHeight * 0.03, 
+      right: screenWidth * 0.04,  
       child: _isOpen
           ? SizedBox(
               width: panelWidth,

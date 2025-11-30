@@ -1,30 +1,24 @@
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
-const { onRequest } = require("firebase-functions/v2/https"); // Necesario para recibir la petición de la app
+const { onRequest } = require("firebase-functions/v2/https"); 
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
-const { SessionsClient } = require("@google-cloud/dialogflow-cx"); // Cliente de Dialogflow
+const { SessionsClient } = require("@google-cloud/dialogflow-cx"); 
 
 initializeApp();
 const db = getFirestore();
 
-// ==========================================
-// CONFIGURACIÓN DE DIALOGFLOW CX
-// ==========================================
-// TODO: Reemplaza estos valores con los de tu agente
-const location = "us-central1"; // Ej: us-central1, global, etc.
-const agentId = "1d0a0cfd-ae1b-4fec-847b-23f8fddf6241"; // Copia el ID de tu agente desde la consola de Dialogflow
+//configuracion de Dialogflow
 
-// El Project ID se toma automáticamente del entorno de Firebase, 
-// pero si prefieres ponerlo manual: const projectId = "tu-proyecto-id";
+const location = "us-central1";
+const agentId = "1d0a0cfd-ae1b-4fec-847b-23f8fddf6241";
+
 const projectId = process.env.GCLOUD_PROJECT; 
 
 const client = new SessionsClient({ apiEndpoint: `${location}-dialogflow.googleapis.com` });
 
-// ==========================================
-// NUEVA FUNCIÓN: GATEWAY DE AUDIO (VOZ)
-// ==========================================
+//funcion de grabado de audio
 exports.dialogflowAudioGateway = onRequest(async (req, res) => {
-    // Manejo básico de métodos
+    
     if (req.method !== 'POST') {
         res.status(405).send('Method Not Allowed');
         return;
@@ -33,7 +27,7 @@ exports.dialogflowAudioGateway = onRequest(async (req, res) => {
     try {
         const { audioBase64, sessionId } = req.body;
 
-        // Construir la ruta de la sesión
+        
         const sessionPath = client.projectLocationAgentSessionPath(
             projectId,
             location,
@@ -41,35 +35,35 @@ exports.dialogflowAudioGateway = onRequest(async (req, res) => {
             sessionId
         );
 
-        // Configurar la solicitud a Dialogflow CX
+        
         const request = {
             session: sessionPath,
             queryInput: {
                 audio: {
                     config: {
-                        audioEncoding: "AUDIO_ENCODING_LINEAR_16", // Formato WAV que enviamos desde Flutter
+                        audioEncoding: "AUDIO_ENCODING_LINEAR_16", 
                         sampleRateHertz: 16000, 
                     },
-                    audio: audioBase64, // El audio en Base64
+                    audio: audioBase64, 
                 },
-                languageCode: "es", // Idioma español
+                languageCode: "es", 
             },
             outputAudioConfig: {
-                audioEncoding: "OUTPUT_AUDIO_ENCODING_MP3", // Queremos respuesta en MP3
+                audioEncoding: "OUTPUT_AUDIO_ENCODING_MP3", 
             },
         };
 
-        // Enviar a Dialogflow y esperar respuesta
+        
         const [response] = await client.detectIntent(request);
 
-        // Extraer texto y audio de la respuesta
+        
         const responseText = response.queryResult.responseMessages[0]?.text?.text[0] || "No entendí, ¿puedes repetir?";
         const responseAudio = response.outputAudio; 
 
-        // Responder a la App Flutter
+        
         res.status(200).send({
             text: responseText,
-            // Convertimos el buffer de audio a Base64 para enviarlo por JSON
+            
             audio: responseAudio ? responseAudio.toString('base64') : null
         });
 
@@ -80,9 +74,7 @@ exports.dialogflowAudioGateway = onRequest(async (req, res) => {
 });
 
 
-// ==========================================
-// TUS FUNCIONES EXISTENTES (FIRESTORE)
-// ==========================================
+//FUNCION NOTIFICACIONES
 
 exports.notificarNuevoPrograma = onDocumentCreated("programas_sociales/{programaId}", (event) => {
     const snapshot = event.data;
