@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../theme/colors.dart'; 
 
-// CORRECCIÓN IMPORTANTE
 import 'package:prueba2app/home_page_content.dart' hide PrincipalPage;
 
 class ServiciosPage extends StatefulWidget {

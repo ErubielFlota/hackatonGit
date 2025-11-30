@@ -228,7 +228,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    // 1. Detectar si hay cambios
+    // Detectar si hay cambios
     final bool dataChanged = (_nombre.text.trim() != _originalNombre.trim()) ||
         (_apellido.text.trim() != _originalApellido.trim()) ||
         (_curp.text.trim().toUpperCase() != _originalCurp.trim().toUpperCase());
@@ -243,7 +243,7 @@ class _ProfilePageState extends State<ProfilePage> {
       return;
     }
 
-    // 2. Validar CURP
+    // Validar CURP
     final curp = _curp.text.trim().toUpperCase();
     if (curp.isNotEmpty && !_validarCurp(curp)) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -255,7 +255,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     String? password;
 
-    // 3. Solicitar contraseña si hay cambios en datos
+    // Solicitar contraseña si hay cambios en datos
     if (dataChanged) {
       password = await _confirmPasswordDialog(context);
       if (password == null) return;

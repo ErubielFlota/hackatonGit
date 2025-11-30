@@ -568,7 +568,7 @@ const List<String> _localidadesDisponibles = [
   'Tulum'
 ];
 
-//    PRINCIPAL PAGE — HOME PAGE CONTENT
+//    PRINCIPAL PAGE
 
 class PrincipalPage extends StatefulWidget {
   const PrincipalPage({super.key});
@@ -793,7 +793,7 @@ class _PrincipalPageState extends State<PrincipalPage> {
 }
 
 
-// UBICACIÓN: Al final de home_page_content.dart
+
 
 class ProgramaCard extends StatelessWidget {
   final Programa programa;
@@ -919,7 +919,7 @@ class ProgramaCard extends StatelessWidget {
             ),
           ),
 
-          // --- BOTÓN DE FAVORITOS (AQUÍ ESTÁ EL CAMBIO) ---
+          // BOTÓN DE FAVORITOS
           if (user != null)
             Positioned(
               top: 0,
@@ -950,7 +950,7 @@ class ProgramaCard extends StatelessWidget {
                           .doc(programa.id);
 
                       if (isFav) {
-                        // --- LÓGICA DE CONFIRMACIÓN PARA ELIMINAR ---
+                        // LÓGICA DE CONFIRMACIÓN PARA ELIMINAR 
                         bool? confirmar = await showDialog<bool>(
                           context: context,
                           builder: (BuildContext ctx) {
@@ -974,7 +974,7 @@ class ProgramaCard extends StatelessWidget {
                           },
                         );
 
-                        // Si el usuario presionó "Eliminar" (true)
+                        
                         if (confirmar == true) {
                           await favRef.delete();
                           if (context.mounted) {
@@ -986,10 +986,10 @@ class ProgramaCard extends StatelessWidget {
                             );
                           }
                         }
-                        // Si presionó cancelar o fuera del dialogo, no hace nada.
+                       
 
                       } else {
-                        // --- LÓGICA PARA AGREGAR (SIN CONFIRMACIÓN) ---
+                        
                         await favRef.set(programa.toMap());
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(

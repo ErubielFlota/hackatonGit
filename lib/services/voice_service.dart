@@ -11,10 +11,23 @@ class VoiceService {
   final AudioRecorder _audioRecorder = AudioRecorder();
   final AudioPlayer _audioPlayer = AudioPlayer();
   
-  // URL de tu Cloud Function (Paso 1)
+  // URL de tu Cloud Function
   final String _functionUrl = "https://us-central1-pruebahackaton-bfb64.cloudfunctions.net/dialogflowAudioGateway";
 
+  // Método para detener cualquier reproducción de audio actual
+  // <<< NUEVO: Esto permite callar al bot al cerrar el chat o grabar de nuevo
+  Future<void> stopAudio() async {
+    try {
+      await _audioPlayer.stop();
+    } catch (e) {
+      print("Error al detener audio: $e");
+    }
+  }
+
   Future<void> startRecording() async {
+    // 1. Detenemos al bot si estaba hablando antes de empezar a grabar
+    await stopAudio(); 
+
     // Verificar permisos
     var status = await Permission.microphone.request();
     if (status != PermissionStatus.granted) return;
@@ -71,6 +84,9 @@ class VoiceService {
   }
 
   Future<void> playResponseAudio(String base64String) async {
+    // <<< MODIFICADO: Primero nos aseguramos que no haya otro audio sonando
+    await stopAudio(); 
+    
     Uint8List bytes = base64Decode(base64String);
     await _audioPlayer.play(BytesSource(bytes));
   }
