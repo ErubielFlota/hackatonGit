@@ -28,6 +28,14 @@ dependencies:
   uuid: ^4.5.2
   url_launcher: ^6.3.2
   firebase_storage: ^13.0.4
+  record: ^5.1.0
+  audioplayers: ^5.0.0
+  permission_handler: ^11.0.0
+  path_provider: ^2.0.0
+
+dependency_overrides:
+  record_linux: ^1.2.0
+  record_platform_interface: ^1.4.0
 
 dev_dependencies:
   flutter_test:
