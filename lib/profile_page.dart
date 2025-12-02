@@ -886,7 +886,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                 child: _saving
                     ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-                    : Text('Enviar Reporte', style: TextStyle(fontSize: fontBase, color: Colors.white, fontWeight: FontWeight.bold)),
+                    : Text('Guardar Cambios', style: TextStyle(fontSize: fontBase, color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
 
