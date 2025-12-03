@@ -600,31 +600,36 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildSimpleField({
-    required TextEditingController controller,
-    required String labelText,
-    bool enabled = true,
-    TextCapitalization textCapitalization = TextCapitalization.none,
-  }) {
-    const primaryColor = Colors.blue;
+  required TextEditingController controller,
+  required String labelText,
+  bool enabled = true,
+  TextCapitalization textCapitalization = TextCapitalization.none,
+}) {
+  const primaryColor = Colors.blue;
 
-    return TextField(
-      controller: controller,
-      enabled: enabled,
-      textCapitalization: textCapitalization,
-      style: TextStyle(
-        color: enabled ? Colors.black : Colors.grey[700],
+  return TextField(
+    controller: controller,
+    enabled: enabled,
+    textCapitalization: textCapitalization,
+    style: TextStyle(
+      color: enabled ? Colors.black : Colors.grey[700],
+    ),
+    decoration: InputDecoration(
+      labelText: labelText,
+      labelStyle: const TextStyle(             
+        fontWeight: FontWeight.bold,
+        color: Colors.black,                  
       ),
-      decoration: InputDecoration(
-        labelText: labelText,
-        enabledBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: primaryColor),
-        ),
-        disabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey.shade400),
-        ),
+      enabledBorder: const UnderlineInputBorder(
+        borderSide: BorderSide(color: primaryColor),
       ),
-    );
-  }
+      disabledBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.grey),
+      ),
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -815,29 +820,73 @@ class _ProfilePageState extends State<ProfilePage> {
               labelText: "Correo",
               enabled: false,
             ),
+            const SizedBox(height: 15),
 
-            Row(
-              children: [
-                Expanded(
-                    child: OutlinedButton(
-                        onPressed: _changeEmailDialog,
-                        child: const Text("Cambiar correo"))),
-                const SizedBox(width: 10),
-                Expanded(
-                    child: OutlinedButton(
-                        onPressed: _changePassDialog,
-                        child: const Text("Cambiar contraseña"))),
-              ],
-            ),
+            
+
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _changeEmailDialog,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        minimumSize: const Size(0, 48), 
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "Cambiar correo",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _changePassDialog,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        minimumSize: const Size(0, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "Cambiar contraseña",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+
             const SizedBox(height: 25),
 
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _saving ? null : _saveProfile,
+                style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
                 child: _saving
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Guardar"),
+                    ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+                    : Text('Guardar Cambios', style: TextStyle(fontSize: fontBase, color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
 
@@ -845,7 +894,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const Divider(thickness: 1.5),
             const SizedBox(height: 10),
 
-            // SECCIÓN MIS FAVORITOS
+            // La parte de favoritos
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
