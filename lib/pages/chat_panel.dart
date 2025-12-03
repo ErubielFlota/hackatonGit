@@ -66,7 +66,7 @@ class _ChatPanelState extends State<ChatPanel>
     setState(() {
       _messages.add(_Message(isWelcomeImage: true));
       _messages.add(_Message(
-        text: "¡Hola! Soy Leoncibot tu aistente ChatBot. ¿En qué puedo ayudarte hoy?👋🏻",
+        text: "¡Hola! Soy Leoncibot tu asistente ChatBot. ¿En qué puedo ayudarte hoy?👋🏻",
       ));
     });
   }
